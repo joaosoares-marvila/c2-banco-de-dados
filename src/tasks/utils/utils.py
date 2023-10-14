@@ -22,7 +22,7 @@ def busca_elemento_XPATH(driver: webdriver, xpath: str) -> WebElement:
         WebElement: O elemento encontrado.
     """
     return WebDriverWait(driver, TEMPO_ESPERA).until(
-                    EC.presence_of_element_located(
+                    EC.visibility_of_element_located(
                         (By.XPATH, xpath)
                     )
                 )
@@ -39,7 +39,7 @@ def busca_elemento_ID(driver: webdriver, id: str) -> WebElement:
         WebElement: O elemento encontrado.
     """
     return WebDriverWait(driver, TEMPO_ESPERA).until(
-                    EC.presence_of_element_located(
+                    EC.visibility_of_element_located(
                         (By.ID, id)
                     )
                 )
@@ -56,7 +56,7 @@ def busca_elemento_CLASS(driver: webdriver, class_name: str) -> WebElement:
         WebElement: O elemento encontrado.
     """
     return WebDriverWait(driver, TEMPO_ESPERA).until(
-                    EC.presence_of_element_located(
+                    EC.visibility_of_element_located(
                         (By.CLASS_NAME, class_name)
                     )
                 )
@@ -85,5 +85,8 @@ def formata_preco(preco: str) -> float:
     for caractere in preco:
         if not caractere.isalpha():
             preco_formatado += caractere
+
+    if preco_formatado[-1] == '.':
+        preco_formatado = preco_formatado[:-1]
 
     return preco_formatado

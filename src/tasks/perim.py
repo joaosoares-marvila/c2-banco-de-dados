@@ -14,16 +14,16 @@ from tasks.utils.utils import (
     formata_preco
 )
 
-class Extrabom(Mercado):
+class Perim(Mercado):
     """
-    Classe que representa a automatização de tarefas relacionadas ao mercado Extrabom.
+    Classe que representa a automatização de tarefas relacionadas ao mercado Perim.
 
-    Esta classe herda da classe Mercado e implementa a tarefa específica do mercado Extrabom.
+    Esta classe herda da classe Mercado e implementa a tarefa específica do mercado Perim.
     Ela busca produtos de referência na plataforma e coleta informações relevantes, como URL, título e preço.
 
     Attributes:
-    - nome (str): O nome do mercado (Extrabom).
-    - url (str): A URL base de pesquisa do mercado Extrabom.
+    - nome (str): O nome do mercado (Perim).
+    - url (str): A URL base de pesquisa do mercado Perim.
     - produtos_referencia (list): Uma lista de produtos de referência para buscar no mercado.
 
     Methods:
@@ -38,8 +38,8 @@ class Extrabom(Mercado):
 
         super().__init__(
             codigo = 1,
-            url = 'https://www.extrabom.com.br/busca/?q=',
-            nome = 'ExtraBom'
+            url = 'https://www.perim.com.br/produtos/buscas?q=',
+            nome = 'Perim'
         )
         
     def busca_produto(self, produto: str) -> None:
@@ -50,14 +50,14 @@ class Extrabom(Mercado):
 
         # --------- Busca produto ---------
         # Recupera url do produto
-        url_produto = busca_elemento_XPATH(self.driver, '//*[@id="conteudo"]/div[2]/div[1]/div[1]/div/div/div[2]/div[1]/a').get_attribute('href')
+        url_produto = busca_elemento_XPATH(self.driver, '/html/body/app-root/app-produto-busca/div/div/div[1]/div/div[1]/app-produto-card/div/div/app-produto-imagem/a').get_attribute('href')
         self.driver.get(url_produto)
         
         # Recupera titulo do produto
-        titulo_produto = busca_elemento_XPATH(self.driver, '//*[@id="conteudo"]/div[2]/div/div/div/div[2]/div/h1').text
+        titulo_produto = busca_elemento_XPATH(self.driver, '//*[@id="product"]/div/h3').text
 
         # Recupera preco do produto
-        valor_unitario_produto = busca_elemento_CLASS(self.driver, 'valor').text
+        valor_unitario_produto = busca_elemento_XPATH(self.driver, '//*[@id="product"]/div/app-tag-preco/div/div[2]').text
         valor_unitario_produto = formata_preco(valor_unitario_produto)
         
 
@@ -73,9 +73,7 @@ class Extrabom(Mercado):
 
 if __name__ == '__main__':
     
-
-    # ExtaBom
-    extrabom = Extrabom()
-    extrabom.busca_produto(produto='Feijão')
+    perim = Perim()
+    perim.busca_produto(produto='Feijão')
 
 
