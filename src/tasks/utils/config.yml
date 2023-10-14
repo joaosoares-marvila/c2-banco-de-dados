@@ -1,6 +1,0 @@
-EXTRABOM:
-  URL: 'https://www.extrabom.com.br/busca/?q='
-  XPATH_URL_PRODUTO: '//*[@id="conteudo"]/div[2]/div[1]/div[1]/div/div/div[2]/div[1]/a'
-  XPATH_TITULO_PRODUTO: '//*[@id="conteudo"]/div[2]/div/div/div/div[2]/div/h1'
-  CLASS_VALOR_UNITARIO_PRODUTO: 'valor'
-

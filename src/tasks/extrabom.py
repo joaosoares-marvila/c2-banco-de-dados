@@ -7,16 +7,12 @@ sys.path.append('c:\\Users\\joaos\\Desktop\\Banco de dados\\c2-banco-de-dados\\s
 from model.mercados import Mercado
 from model.produtos import Produto
 
-
 # Utils
 from tasks.utils.utils import (
-    config,
     busca_elemento_XPATH,
     busca_elemento_CLASS,
     formata_preco
 )
-
-configuracoes = config()
 
 class Extrabom(Mercado):
     """
@@ -42,7 +38,7 @@ class Extrabom(Mercado):
 
         super().__init__(
             codigo = 1,
-            url = configuracoes['EXTRABOM']['URL'],
+            url = 'https://www.extrabom.com.br/busca/?q=',
             nome = 'ExtraBom'
         )
         
@@ -54,14 +50,14 @@ class Extrabom(Mercado):
 
         # --------- Busca produto ---------
         # Recupera url do produto
-        url_produto = busca_elemento_XPATH(self.driver, configuracoes['EXTRABOM']['XPATH_URL_PRODUTO']).get_attribute('href')
+        url_produto = busca_elemento_XPATH(self.driver, '//*[@id="conteudo"]/div[2]/div[1]/div[1]/div/div/div[2]/div[1]/a').get_attribute('href')
         self.driver.get(url_produto)
         
         # Recupera titulo do produto
-        titulo_produto = busca_elemento_XPATH(self.driver, configuracoes['EXTRABOM']['XPATH_TITULO_PRODUTO']).text
+        titulo_produto = busca_elemento_XPATH(self.driver, '//*[@id="conteudo"]/div[2]/div/div/div/div[2]/div/h1').text
 
         # Recupera preco do produto
-        valor_unitario_produto = busca_elemento_CLASS(self.driver, configuracoes['EXTRABOM']['CLASS_VALOR_UNITARIO_PRODUTO']).text
+        valor_unitario_produto = busca_elemento_CLASS(self.driver, 'valor').text
         valor_unitario_produto = formata_preco(valor_unitario_produto)
         
 

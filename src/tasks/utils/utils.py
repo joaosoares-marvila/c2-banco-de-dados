@@ -8,22 +8,7 @@ from selenium.webdriver.remote.webelement import WebElement
 import os
 import yaml
 
-
-CONFIG_PATH = Path(__file__).parent / 'config.yml'
 TEMPO_ESPERA = 3
-
-def config() -> dict[str, any]:
-    """
-    Carrega as configurações a partir de um arquivo YAML.
-
-    Returns:
-        dict: Um dicionário contendo as configurações carregadas do arquivo YAML.
-    """
-    with open(CONFIG_PATH, 'r') as arquivo_yaml:
-        configuracao = yaml.safe_load(arquivo_yaml)
-    return configuracao
-
-
 
 def busca_elemento_XPATH(driver: webdriver, xpath: str) -> WebElement:
     """
