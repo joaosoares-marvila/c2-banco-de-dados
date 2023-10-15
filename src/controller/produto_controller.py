@@ -3,50 +3,62 @@ import sys
 
 import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-from conexion.oracle_queries import OracleQueries
 
+from conexion.oracle_queries import OracleQueries
+from model.produtos import Produto
+from controller.produto_mercado_controller import buscar_produtos_mercados
 
 class Controller_Produto():
+    '''
+    Classe para gerenciar operações relacionadas a produtos.
+    '''
     def __init__(self):
         pass
   
-
     def inserir_produto(self):
-        un = 'sys'
-        cs = 'localhost:1521/xe'
-        pw = '123mudar'
+        '''
+        Insere um novo produto no banco de dados.
 
-        with oracledb.connect(user=un, password=pw, dsn=cs, mode=oracledb.SYSDBA) as connection:
-            with connection.cursor() as cursor:
-                descricao_produto = input("Digite o nome do produto que deseja inserir: ")
-                
-                if self.verifica_existencia_produto(connection, descricao_produto):
-                    cursor.execute("INSERT INTO PRODUTOS (descricao_produto) VALUES (:descricao_produto)", descricao_produto=descricao_produto)
+        Returns:
+            tuple: Uma tupla contendo as informações do produto encontrado nos mercados Perim e Extrabom.
+        '''
+        # Cria uma nova conexão com o banco que permite alteração
+        oracle = OracleQueries(can_write=True)
+        oracle.connect()
 
-                # cursor.execute(f"SELECT * FROM PRODUTOS WHERE descricao_produto = '{descricao_produto}'")
-                cursor.execute("SELECT * FROM PRODUTOS WHERE descricao_produto = :descricao_produto", descricao_produto=descricao_produto)
-                result = cursor.fetchall()
-                for row in result:
-                    print(row)
+        descricao_produto = input("Digite o nome do produto que deseja inserir: ")
+        
+        if not self.verifica_existencia_produto(oracle, descricao_produto):
+            # Insere um novo produto caso ele não esteja presente no banco
+            oracle.write(f"insert into produtos (descricao_produto) values ('{descricao_produto}')")
 
-                cursor.execute("SELECT * FROM PRODUTOS")
-                result = cursor.fetchall()
-                for row in result:
-                    print(row)
-            
-                connection.commit()
+        data_frame_produto = oracle.sqlToDataFrame(f"select * from produtos where descricao_produto = '{descricao_produto}'")
+        produto = Produto(data_frame_produto.codigo.value[0], data_frame_produto.descricao.value[0])
+
+        produto_perim, produto_extrabom = buscar_produtos_mercados(produto)
+
+        return produto_perim, produto_extrabom
+    
+
+    def verifica_existencia_produto(oracle: OracleQueries, descricao_produto: str) -> bool:
+        '''
+        Verifica se um produto com uma determinada descrição já existe no banco de dados.
+
+        Args:
+            oracle (OracleQueries): Instância da classe OracleQueries para realizar a consulta.
+            descricao_produto (str): Descrição do produto a ser verificado.
+
+        Returns:
+            bool: True se o produto existe, False caso contrário.
+        '''
+        df = oracle.sqlToDataFrame(f"SELECT COUNT(*) FROM produtos WHERE descricao_produto = '{descricao_produto}'")
+
+        if df.iloc[0, 0] > 0:
+            return True
+        else:
+            return False
 
 
-
-
-    def verifica_existencia_produto(self, connection, descricao_produto):
-        with connection.cursor() as cursor:
-            cursor.execute(f"SELECT codigo_produto FROM produtos WHERE descricao_produto = '{descricao_produto}'")
-            result = cursor.fetchall()
-            return not result
-
-  
 if __name__ == "__main__":
     controler_produto = Controller_Produto()
     controler_produto.inserir_produto()
-

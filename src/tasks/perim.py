@@ -5,6 +5,7 @@ from loguru import logger
 import sys
 sys.path.append('c:\\Users\\joaos\\Desktop\\Banco de dados\\c2-banco-de-dados\\src')
 from model.mercados import Mercado
+from model.produtos_mercados import ProdutoMercado
 from model.produtos import Produto
 
 # Utils
@@ -42,33 +43,34 @@ class Perim(Mercado):
             nome = 'Perim'
         )
         
-    def busca_produto(self, produto: str) -> None:
+    def busca_produto(self, produto: Produto) -> None:
 
         # --------- Iniciando task ---------
-        self.driver.get(f'{self.url}{produto}')
+        self.driver.get(f'{self.url}{produto.descricao}')
 
 
         # --------- Busca produto ---------
-        # Recupera url do produto
-        url_produto = busca_elemento_XPATH(self.driver, '/html/body/app-root/app-produto-busca/div/div/div[1]/div/div[1]/app-produto-card/div/div/app-produto-imagem/a').get_attribute('href')
-        self.driver.get(url_produto)
-        
-        # Recupera titulo do produto
-        titulo_produto = busca_elemento_XPATH(self.driver, '//*[@id="product"]/div/h3').text
+        try:
+            # Recupera url do produto
+            url_produto = busca_elemento_XPATH(self.driver, '/html/body/app-root/app-produto-busca/div/div/div[1]/div/div[1]/app-produto-card/div/div/app-produto-imagem/a').get_attribute('href')
+            self.driver.get(url_produto)
+            
+            # Recupera titulo do produto
+            descricao_produto = busca_elemento_XPATH(self.driver, '//*[@id="product"]/div/h3').text
 
-        # Recupera preco do produto
-        valor_unitario_produto = busca_elemento_XPATH(self.driver, '//*[@id="product"]/div/app-tag-preco/div/div[2]').text
-        valor_unitario_produto = formata_preco(valor_unitario_produto)
-        
+            # Recupera preco do produto
+            valor_unitario_produto = busca_elemento_XPATH(self.driver, '//*[@id="product"]/div/app-tag-preco/div/div[2]').text
+            valor_unitario_produto = formata_preco(valor_unitario_produto)
+            
+            # Recupera o codigo do produto
+            codigo_produto = url_produto.split('/')[-2]
 
-        codigo_produto = url_produto.split('/')[-2]
+            # Instancia o produto
+            produto_mercado = ProdutoMercado(codigo= codigo_produto, descricao= descricao_produto, produto= produto, mercado= self,  valor_unitario= valor_unitario_produto)
 
-        logger.info(f'Titulo: {titulo_produto}')
-        logger.info(f'Código: {codigo_produto}')
-        logger.info(f'Preço: {valor_unitario_produto}')
-        logger.info(f'url: {url_produto}\n')
-
-        return codigo_produto, titulo_produto, valor_unitario_produto, self.codigo
+            return produto_mercado
+        except:
+            return None
 
 
 if __name__ == '__main__':

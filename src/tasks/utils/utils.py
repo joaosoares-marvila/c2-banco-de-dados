@@ -89,4 +89,6 @@ def formata_preco(preco: str) -> float:
     if preco_formatado[-1] == '.':
         preco_formatado = preco_formatado[:-1]
 
+    preco_formatado = float(preco_formatado)
+
     return preco_formatado

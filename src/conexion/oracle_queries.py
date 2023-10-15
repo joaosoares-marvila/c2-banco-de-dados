@@ -34,7 +34,6 @@ class OracleQueries:
     def __del__(self):
         '''
         Executado quando o objeto é destruído. Fecha a conexão se estiver aberta.
-
         '''
         if hasattr(self, 'conn'):
             self.close()

@@ -1,11 +1,32 @@
 from mercados import Mercado
 from produtos import Produto
+
 class ProdutoMercado():
     # --------- Construtor --------- 
-    def __init__(self, produto: Produto, mercado: Mercado, preco: float) -> None:
+    def __init__(self, produto: Produto, mercado: Mercado, codigo: str, descricao: str, valor_unitario: float, url: str) -> None:
+        self._codigo = codigo
+        self._descricao = descricao
         self._produto = produto
         self._mercado = mercado
-        self._preco = preco
+        self._valor_unitario = valor_unitario
+
+    # --------- Código --------- 
+    @property
+    def codigo(self) -> str:
+        return self._codigo
+
+    @codigo.setter
+    def codigo(self, codigo: str) -> None:
+        self._codigo = codigo
+
+    # --------- Descrição --------- 
+    @property
+    def descricao(self) -> str:
+        return self._descricao
+
+    @descricao.setter
+    def descricao(self, descricao: str) -> None:
+        self._descricao = descricao
 
     # --------- Produto --------- 
     @property
@@ -25,18 +46,18 @@ class ProdutoMercado():
     def mercado(self, mercado: Mercado) -> None:
         self._mercado = mercado
     
-    # --------- Preço --------- 
+    # --------- Valor unitário --------- 
     @property
-    def preco(self) -> float:
-        return self._preco
+    def valor_unitario(self) -> float:
+        return self._valor_unitario
 
-    @produto.setter
-    def produto(self, produto: Produto) -> None:
-        self._produto = produto
+    @valor_unitario.setter
+    def valor_unitario(self, valor_unitario: float) -> None:
+        self._valor_unitario = valor_unitario
 
     # --------- Representação --------- 
     def __repr__(self) -> str:
-        return f"Produto: {self.produto.codigo} - {self.produto._descricao} | Mercado: {self.mercado.nome} | Preço: {self.preco}"
+        return f"Mercado: {self.mercado.nome} | Produto: {self.descricao} Valor unitário: {self.valor_unitario}"
 
 
 
