@@ -37,39 +37,41 @@ class Extrabom(Mercado):
     def __init__(self) -> None:
 
         super().__init__(
-            codigo = 1,
+            codigo = 2,
             url = 'https://www.extrabom.com.br/busca/?q=',
             nome = 'ExtraBom'
         )
         
-    def busca_produto(self, produto: str) -> None:
+    def busca_produto(self, produto: Produto) -> None:
 
         # --------- Iniciando task ---------
-        self.driver.get(f'{self.url}{produto}')
+        try:
+
+            self.driver.get(f'{self.url}{produto.descricao}')
 
 
-        # --------- Busca produto ---------
-        # Recupera url do produto
-        url_produto = busca_elemento_XPATH(self.driver, '//*[@id="conteudo"]/div[2]/div[1]/div[1]/div/div/div[2]/div[1]/a').get_attribute('href')
-        self.driver.get(url_produto)
-        
-        # Recupera titulo do produto
-        titulo_produto = busca_elemento_XPATH(self.driver, '//*[@id="conteudo"]/div[2]/div/div/div/div[2]/div/h1').text
+            # --------- Busca produto ---------
+            # Recupera url do produto
+            url_produto = busca_elemento_XPATH(self.driver, '//*[@id="conteudo"]/div[2]/div[1]/div[1]/div/div/div[2]/div[1]/a').get_attribute('href')
+            self.driver.get(url_produto)
+            
+            # Recupera titulo do produto
+            descricao_produto = busca_elemento_XPATH(self.driver, '//*[@id="conteudo"]/div[2]/div/div/div/div[2]/div/h1').text
 
-        # Recupera preco do produto
-        valor_unitario_produto = busca_elemento_CLASS(self.driver, 'valor').text
-        valor_unitario_produto = formata_preco(valor_unitario_produto)
-        
+            # Recupera preco do produto
+            valor_unitario_produto = busca_elemento_CLASS(self.driver, 'valor').text
+            valor_unitario_produto = formata_preco(valor_unitario_produto)
+            
+            # Recupera o codigo do produto
+            codigo_produto = url_produto.split('/')[-2]
 
-        codigo_produto = url_produto.split('/')[-2]
+            # Instancia o produto
+            produto_mercado = ProdutoMercado(codigo=codigo_produto, descricao=descricao_produto, produto=produto, mercado=self, valor_unitario=valor_unitario_produto)
 
-        logger.info(f'Titulo: {titulo_produto}')
-        logger.info(f'Código: {codigo_produto}')
-        logger.info(f'Preço: {valor_unitario_produto}')
-        logger.info(f'url: {url_produto}\n')
+            return produto_mercado
 
-        return codigo_produto, titulo_produto, valor_unitario_produto, self.codigo
-
+        except:
+            return None
 
 if __name__ == '__main__':
     

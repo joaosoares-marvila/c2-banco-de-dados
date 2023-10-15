@@ -4,7 +4,7 @@ class Produto:
                  codigo:int=None, 
                  descricao:str=None
                  ):
-        self._codigo = codigo
+        self._codigo = int(codigo)
         self._descricao = descricao
 
     # --------- Código --------- 
@@ -18,13 +18,13 @@ class Produto:
     
     # --------- Código --------- 
     @property
-    def descricao(self) -> int:
-        return self._codigo
+    def descricao(self) -> str:
+        return self._descricao
 
     @descricao.setter
-    def descricao(self, descricao: int) -> None:
+    def descricao(self, descricao: str) -> None:
         self._descricao = descricao
 
-    # --------- Representação --------- 
-    def __repr__(self) -> str:
-        return f"Codigo: {self.get_codigo()} | Descrição: {self.get_descricao()}"
+    # --------- String --------- 
+    def __str__(self) -> str:
+        return f"Descrição: {self.descricao}"

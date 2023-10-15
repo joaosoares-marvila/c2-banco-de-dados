@@ -8,7 +8,7 @@ from selenium.webdriver.remote.webelement import WebElement
 import os
 import yaml
 
-TEMPO_ESPERA = 3
+TEMPO_ESPERA = 10
 
 def busca_elemento_XPATH(driver: webdriver, xpath: str) -> WebElement:
     """

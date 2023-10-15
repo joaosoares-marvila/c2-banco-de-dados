@@ -46,11 +46,9 @@ class Perim(Mercado):
     def busca_produto(self, produto: Produto) -> None:
 
         # --------- Iniciando task ---------
-        self.driver.get(f'{self.url}{produto.descricao}')
 
-
-        # --------- Busca produto ---------
         try:
+            self.driver.get(f'{self.url}{produto.descricao}')
             # Recupera url do produto
             url_produto = busca_elemento_XPATH(self.driver, '/html/body/app-root/app-produto-busca/div/div/div[1]/div/div[1]/app-produto-card/div/div/app-produto-imagem/a').get_attribute('href')
             self.driver.get(url_produto)
@@ -71,7 +69,6 @@ class Perim(Mercado):
             return produto_mercado
         except:
             return None
-
 
 if __name__ == '__main__':
     

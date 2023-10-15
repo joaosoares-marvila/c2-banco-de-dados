@@ -1,14 +1,18 @@
-from mercados import Mercado
-from produtos import Produto
+import sys
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+from model.mercados import Mercado
+from model.produtos import Produto
 
 class ProdutoMercado():
     # --------- Construtor --------- 
-    def __init__(self, produto: Produto, mercado: Mercado, codigo: str, descricao: str, valor_unitario: float, url: str) -> None:
+    def __init__(self, produto: Produto, mercado: Mercado, codigo: str, descricao: str, valor_unitario: float) -> None:
         self._codigo = codigo
         self._descricao = descricao
         self._produto = produto
         self._mercado = mercado
-        self._valor_unitario = valor_unitario
+        self._valor_unitario = float(valor_unitario)
 
     # --------- Código --------- 
     @property
@@ -55,8 +59,8 @@ class ProdutoMercado():
     def valor_unitario(self, valor_unitario: float) -> None:
         self._valor_unitario = valor_unitario
 
-    # --------- Representação --------- 
-    def __repr__(self) -> str:
+    # --------- String --------- 
+    def __str__(self) -> str:
         return f"Mercado: {self.mercado.nome} | Produto: {self.descricao} Valor unitário: {self.valor_unitario}"
 
 

@@ -7,7 +7,7 @@ from selenium import webdriver
 class Mercado:
     # --------- Construtor --------- 
     def __init__(self, codigo: int, nome: str, url: str) -> None:
-        self._codigo = codigo
+        self._codigo = int(codigo)
         self._nome = nome
         self.url = url
     
@@ -37,8 +37,8 @@ class Mercado:
         self._nome = nome
 
 
-    # --------- Representação --------- 
-    def __repr__(self) -> str:
+    # --------- String --------- 
+    def __str__(self) -> str:
         return f"Codigo: {self.codigo} | Nome: {self.nome}"
 
 
