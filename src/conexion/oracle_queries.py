@@ -126,9 +126,7 @@ class OracleQueries:
         cur.execute(query)
         print(query)
         self.conn.commit()
-        # if self.conn.is_connected:
-        #     self.conn.rollback()  # Rollback any pending transaction
-        #     self.conn.commit()
+       
 
     def close(self):
         '''

@@ -13,47 +13,51 @@ class ControllerProduto:
 
     @staticmethod
     def inserir_produto(descricao_produto: str) -> Produto:
-        '''
-        Insere um novo produto no banco de dados.
 
-        Args:
-            descricao_produto (str): Descrição do produto a ser inserido.
-
-        Returns:
-            tuple: Uma tupla contendo as informações do produto encontrado nos mercados Perim e Extrabom.
-        '''
         oracle = OracleQueries(can_write=True)
         oracle.connect()
         
-        if not ControllerProduto.__verifica_existencia_produto(oracle, descricao_produto):
-            oracle.write(f"INSERT INTO produtos (descricao) VALUES ('{descricao_produto}')")
-
-        data_frame_produto = oracle.sqlToDataFrame(f"SELECT * FROM produtos WHERE descricao = '{descricao_produto}'")
+        produto = ControllerProduto.busca_produto_descricao(oracle, descricao_produto)
         
-        codigo__ = data_frame_produto.iloc[0]['codigo']
-        descricao__ = data_frame_produto.iloc[0]['descricao']
-        produto = Produto(codigo=codigo__,descricao= descricao__)
+        if not produto:
+            oracle.write(f"INSERT INTO produtos (descricao) VALUES ('{descricao_produto}')")
+            data_frame_produto = oracle.sqlToDataFrame(f"SELECT * FROM produtos WHERE descricao = '{descricao_produto}'")
+            codigo = data_frame_produto.iloc[0]['codigo']
+            descricao = data_frame_produto.iloc[0]['descricao']
+            produto = Produto(codigo=codigo,descricao= descricao)
 
         return produto
 
     @staticmethod
-    def __verifica_existencia_produto(oracle: OracleQueries, descricao_produto: str) -> bool:
-        '''
-        Verifica se um produto com uma determinada descrição já existe no banco de dados.
+    def busca_produto_descricao(oracle: OracleQueries, descricao_produto: str) -> Produto:
 
-        Args:
-            oracle (OracleQueries): Instância da classe OracleQueries para realizar a consulta.
-            descricao_produto (str): Descrição do produto a ser verificado.
+        data_frame_produto = oracle.sqlToDataFrame(f"SELECT * FROM produtos WHERE descricao = '{descricao_produto}'")
 
-        Returns:
-            bool: True se o produto existe, False caso contrário.
-        '''
-        df = oracle.sqlToDataFrame(f"SELECT COUNT(*) FROM produtos WHERE descricao = '{descricao_produto}'")
-
-        if df.iloc[0, 0] > 0:
-            return True
+        if data_frame_produto.empty():
+            return None
+        
         else:
-            return False
+            codigo = data_frame_produto.iloc[0]['codigo']
+            descricao = data_frame_produto.iloc[0]['descricao']
+            produto = Produto(codigo=codigo,descricao= descricao)
+
+            return produto
+            
+
+    def busca_produto_codigo(oracle: OracleQueries, codigo: int) -> Produto:
+        
+        data_frame_produto = oracle.sqlToDataFrame(f"SELECT * FROM produtos WHERE codigo = {codigo}")
+
+        if data_frame_produto.empty():
+            return None
+
+        else:
+            codigo = data_frame_produto.iloc[0]['codigo']
+            descricao = data_frame_produto.iloc[0]['descricao']
+            produto = Produto(codigo=codigo,descricao= descricao)
+            
+            return produto
+       
 
 
 if __name__ == "__main__":

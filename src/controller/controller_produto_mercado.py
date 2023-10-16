@@ -67,7 +67,7 @@ class ControllerProdutoMercado():
             if not ControllerProdutoMercado.__verifica_existencia_produto_mercado(oracle, produto_perim.codigo):
                 
                 print('Inserindo produto Perim')
-                
+
                 query = f"insert into produtos_mercados (codigo, descricao, valor_unitario, codigo_produto, CODIGO_MERCADO) values ('{produto_perim.codigo}', '{produto_perim.descricao}', {produto_perim.valor_unitario}, {produto_perim.produto.codigo}, {produto_perim.mercado.codigo} )"
                 
                 print(query)
@@ -83,5 +83,45 @@ class ControllerProdutoMercado():
                 oracle.write(f"insert into produtos_mercados (codigo, descricao, valor_unitario, codigo_produto, CODIGO_MERCADO) values ('{produto_extrabom.codigo}', '{produto_extrabom.descricao}', '{produto_extrabom.valor_unitario}', '{produto_extrabom.produto.codigo}', '{produto_extrabom.mercado.codigo}' )")
         
         return produto_perim, produto_extrabom
+
+
+
+    @staticmethod
+    def busca_produtos_mercados_db(produto: Produto) -> tuple:
+
+        # Cria uma nova conexão com o banco que permite alteração
+        oracle = OracleQueries(can_write=True)
+        oracle.connect()
+
+
+        # DataFrame
+        data_frame_produtos_mercados = oracle.sqlToDataFrame(f'SELECT * FROM produtos_mercados WHERE codigo_produto = {codigo_produto} ORDER BY codigo_mercado')
+
+
+        # Perim
+        dados_produto_perim = data_frame_produtos_mercados.iloc[0]
+        perim = ControllerMercado.busca_mercado_codigo(dados_produto_perim['codigo_mercado']) 
+        
+        produto_perim = ProdutoMercado( produto=produto,
+                                        mercado=perim, 
+                                        codigo=dados_produto_perim['codigo'], 
+                                        descricao=dados_produto_perim['descricao'],
+                                        valor_unitario=dados_produto_perim['valor_unitario'])
+
+        
+        # ExtraBom
+        dados_produto_extrabom = data_frame_produtos.iloc[1]
+        extrabom = ControllerMercado.busca_mercado_codigo(dados_produto_extrabom['codigo_mercado']) 
+        
+        produto_perim = ProdutoMercado( produto=produto,
+                                        mercado=extrabom, 
+                                        codigo=dados_produto_extrabom['codigo'], 
+                                        descricao=dados_produto_extrabom['descricao'],
+                                        valor_unitario=dados_produto_extrabom['valor_unitario'])
+
+
+        # Return
+        return produto_perim, produto_extrabom
+
 
 

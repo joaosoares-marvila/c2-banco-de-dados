@@ -111,5 +111,123 @@ class ControllerProdutoCarrinho:
 
 
 
+
+    @staticmethod
+    def alterar_carrinho():
+        
+        ControllerProdutoCarrinho.lista_todos_produtos()    
+        opcao = input('Digite o código do produto que deseja alterar')
+
+        data_frame_opcao_esclhida = oracle.sqlToDataFrame('select pc.codigo as codigo_produto_carrinho, p.codigo as codigo_produto, pm.codigo as codigo_produto_mercado, pc.quantidade from produtos_carrinho pc inner join produtos_mercados pm on pc.codigo_produto_mercado = pm.codigo inner join produtos p on pm.codigo_produto = p.codigo')
+
+        if not data_frame_opcao_esclhida.empty:
+            
+            codigo_produto_carrinho = data_frame_opcao_esclhida.iloc[0]['codigo_produto_carrinho']
+            codigo_produto = data_frame_opcao_esclhida.iloc[0]['codigo_produto']
+            codigo_produto_mercado = data_frame_opcao_esclhida.iloc[0]['codigo_produto_mercado']
+            quantidade = data_frame_opcao_esclhida.iloc[0]['quantidade']
+
+            
+            print('1 - Alterar quantidade')
+            print('2 - Alterar produto (mercado)')
+            print('0 - Sair')
+            
+            opcao = input("Digite o número da opção desejada: ")
+            
+            if opcao == '1':
+            
+                nova_quantidade = int(input('Digite a quantidade desejada: '))
+                oracle.write(f'UPDATE produtos_carrinho SET quantidade = {nova_quantidade} WHERE codigo = {codigo_produto_carrinho}')
+                print('Produto atualizado! Voltando para a tela inicial...')
+                
+            elif opcao == '2':
+
+                produto = ControllerProduto.busca_produto_codigo(codigo_produto)
+                produto_perim, produto_extrabom =  ControllerProdutoMercado.busca_produtos_mercados_db(produto)
+
+                print('Produtos disponíveis: ')
+                
+                if produto_extrabom and produto_perim:
+                    print(f'1 - {str(produto_perim)}')
+                    print(f'2 - {str(produto_extrabom)}')
+                    print(f'3 - Cancela alteração')
+                
+                    opcao = input('Digite o código do produto que deseja selecionar: ')
+                    
+                    if opcao == '1':
+                        ...
+                    elif opcao == '2':
+                        ...
+                    elif opcao == '3':
+                        ...
+                    else:
+                        ...
+
+                    
+                elif produto_perim:
+                    print(f'1 - {str(produto_perim)}')
+                    print(f'2 - Cancela alteração')
+                    
+                    if opcao == '1':
+                        ...
+                    elif opcao == '2':
+                        ...
+                    else:
+                        ...
+
+                elif produto_extrabom:
+                    print(f'1 - {str(produto_extrabom)}')
+                    print(f'2 - Cancela alteração')
+                    
+                    if opcao == '1':
+                        ...
+                    elif opcao == '2':
+                        ...
+                    else:
+                        ...
+                
+
+        else:
+            print('Código inválido. Voltando ao menu inicial...')
+
+
+
+
+    def excluir_produto():
+
+        ControllerProdutoCarrinho.lista_todos_produtos()
+
+        opcao = input('Digite o código do produto que deseja alterar')
+
+        data_frame_opcao_esclhida = oracle.sqlToDataFrame('select pc.codigo as codigo_produto_carrinho, p.codigo as codigo_produto, pm.codigo as codigo_produto_mercado, pc.quantidade from produtos_carrinho pc inner join produtos_mercados pm on pc.codigo_produto_mercado = pm.codigo inner join produtos p on pm.codigo_produto = p.codigo')
+
+        if not data_frame_opcao_esclhida.empty:
+            ...
+            
+
+
+
+
+    @staticmethod
+    def lista_todos_produtos():
+        # Inicialize a conexão com o banco de dados
+        oracle = OracleQueries(can_write=True)
+        oracle.connect()
+        
+        produtos_carrinho = oracle.sqlToDataFrame('select pc.codigo, p.descricao as produto, pm.descricao as produto_mercado, pm.valor_unitario, pc.quantidade from produtos_carrinho pc inner join produtos_mercados pm on pc.codigo_produto_mercado = pm.codigo inner join produtos p on pm.codigo_produto = p.codigo')
+
+        # Iterar sobre cada linha
+        for index, row in produtos_carrinho.iterrows():
+            codigo = row['codigo']
+            produto = row['produto']
+            valor_unitario = row['valor_unitario']
+            quantidade = row['quantidade']
+            total = valor_unitario * quantidade
+
+            print(f"Código - {codigo} \t Produto: {produto} \t Valor unitário: {valor_unitario} \t Quantidade: {quantidade} \t Total: {total}")
+
+
+
+
 if __name__ == "__main__":
     ControllerProdutoCarrinho.adicionar_produto()
