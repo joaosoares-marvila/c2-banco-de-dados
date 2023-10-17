@@ -120,11 +120,9 @@ class OracleQueries:
         if not self.can_write:
             raise Exception('Não é possível escrever usando esta conexão')
 
-        # print(self.conn.in_transaction)
 
         cur = self.connect()
         cur.execute(query)
-        print(query)
         self.conn.commit()
        
 

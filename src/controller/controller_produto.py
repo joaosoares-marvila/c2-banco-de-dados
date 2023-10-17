@@ -104,7 +104,8 @@ class ControllerProduto:
 
 
 if __name__ == "__main__":
-    controller_produto = ControllerProduto()
-    produtos_perim, produtos_extrabom = controller_produto.inserir_produto("Exemplo")
-    if produtos_perim and produtos_extrabom:
-        print(f"Produtos encontrados: Perim - {produtos_perim}, Extrabom - {produtos_extrabom}")
+    # controller_produto = ControllerProduto()
+    # produtos_perim, produtos_extrabom = controller_produto.inserir_produto("Exemplo")
+    # if produtos_perim and produtos_extrabom:
+    #     print(f"Produtos encontrados: Perim - {produtos_perim}, Extrabom - {produtos_extrabom}")
+    ...

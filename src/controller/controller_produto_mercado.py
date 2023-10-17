@@ -8,6 +8,7 @@ from tasks.extrabom import Extrabom
 from tasks.perim import Perim
 from model.produtos_mercados import ProdutoMercado
 from model.produtos import Produto
+from controller.controller_mercado import ControllerMercado
 
 class ControllerProdutoMercado():
     '''
@@ -60,13 +61,11 @@ class ControllerProdutoMercado():
         # Insere os produtos no banco
         if produto_perim is not None:
 
-            if not ControllerProdutoMercado.__verifica_existencia_produto_mercado(oracle, produto_perim.codigo):
+            if not ControllerProdutoMercado.__verifica_existencia_produto_mercado(oracle=oracle,codigo=produto_perim.codigo):
                 
-                print('Inserindo produto Perim')
 
                 query = f"insert into produtos_mercados (codigo, descricao, valor_unitario, codigo_produto, CODIGO_MERCADO) values ('{produto_perim.codigo}', '{produto_perim.descricao}', {produto_perim.valor_unitario}, {produto_perim.produto.codigo}, {produto_perim.mercado.codigo} )"
                 
-                print(query)
                 
                 oracle.write(query)
 
@@ -75,8 +74,8 @@ class ControllerProdutoMercado():
         
         if produto_extrabom is not None:
 
-            if not ControllerProdutoMercado.__verifica_existencia_produto_mercado(oracle, produto_extrabom.codigo):
-                oracle.write(f"insert into produtos_mercados (codigo, descricao, valor_unitario, codigo_produto, CODIGO_MERCADO) values ('{produto_extrabom.codigo}', '{produto_extrabom.descricao}', '{produto_extrabom.valor_unitario}', '{produto_extrabom.produto.codigo}', '{produto_extrabom.mercado.codigo}' )")
+            if not ControllerProdutoMercado.__verifica_existencia_produto_mercado(oracle=oracle,codigo=produto_extrabom.codigo):
+                oracle.write(f"insert into produtos_mercados (codigo, descricao, valor_unitario, codigo_produto, CODIGO_MERCADO) values ('{produto_extrabom.codigo}', '{produto_extrabom.descricao}', {produto_extrabom.valor_unitario}, {produto_extrabom.produto.codigo}, {produto_extrabom.mercado.codigo} )")
         
 
         return produto_perim, produto_extrabom
@@ -97,38 +96,45 @@ class ControllerProdutoMercado():
 
         """
         # DataFrame
-        data_frame_produtos_mercados = oracle.sqlToDataFrame(f'SELECT * FROM produtos_mercados WHERE codigo_produto = {codigo_produto} ORDER BY codigo_mercado')
+        data_frame_produtos_mercados = oracle.sqlToDataFrame(f'SELECT * FROM produtos_mercados WHERE codigo_produto = {produto.codigo} ORDER BY codigo_mercado')
+        n_linhas, n_colunas = data_frame_produtos_mercados.shape
 
-        # Perim
-        dados_produto_perim = data_frame_produtos_mercados.iloc[0]
-        perim = ControllerMercado.busca_mercado_codigo(dados_produto_perim['codigo_mercado']) 
-        
-        produto_perim = ProdutoMercado(
-            produto=produto,
-            mercado=perim, 
-            codigo=dados_produto_perim['codigo'], 
-            descricao=dados_produto_perim['descricao'],
-            valor_unitario=dados_produto_perim['valor_unitario']
-        )
-        
-        # ExtraBom
-        dados_produto_extrabom = data_frame_produtos.iloc[1]
-        extrabom = ControllerMercado.busca_mercado_codigo(dados_produto_extrabom['codigo_mercado']) 
-        
-        produto_extrabom = ProdutoMercado(
-            produto=produto,
-            mercado=extrabom, 
-            codigo=dados_produto_extrabom['codigo'], 
-            descricao=dados_produto_extrabom['descricao'],
-            valor_unitario=dados_produto_extrabom['valor_unitario']
-        )
+        if n_linhas > 0:
+            # Perim
+            dados_produto_perim = data_frame_produtos_mercados.iloc[0]
+            perim = ControllerMercado.busca_mercado_codigo(oracle=oracle, codigo=dados_produto_perim['codigo_mercado']) 
+            
+            produto_perim = ProdutoMercado(
+                produto=produto,
+                mercado=perim, 
+                codigo=dados_produto_perim['codigo'], 
+                descricao=dados_produto_perim['descricao'],
+                valor_unitario=dados_produto_perim['valor_unitario']
+            )
+        else:
+            produto_perim = None
+
+        if n_linhas > 1:
+            # ExtraBom
+            dados_produto_extrabom = data_frame_produtos_mercados.iloc[1]
+            extrabom = ControllerMercado.busca_mercado_codigo(oracle=oracle, codigo=dados_produto_extrabom['codigo_mercado']) 
+            
+            produto_extrabom = ProdutoMercado(
+                produto=produto,
+                mercado=extrabom, 
+                codigo=dados_produto_extrabom['codigo'], 
+                descricao=dados_produto_extrabom['descricao'],
+                valor_unitario=dados_produto_extrabom['valor_unitario']
+            )
+        else:
+            produto_extrabom = None
 
         # Return
         return produto_perim, produto_extrabom
 
     @staticmethod
     def get_produto_por_codigo(oracle: OracleQueries, codigo: str) -> ProdutoMercado:
-                """
+        """
         Obtém um produto específico do carrinho de acordo com o codigo.
 
         Args:

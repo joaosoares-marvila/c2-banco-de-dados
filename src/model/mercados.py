@@ -6,14 +6,13 @@ from selenium import webdriver
 
 class Mercado:
     # --------- Construtor --------- 
-    def __init__(self, codigo: int, nome: str, url: str) -> None:
+    def __init__(self, codigo: int, nome: str) -> None:
         self._codigo = int(codigo)
         self._nome = nome
-        self.url = url
     
         # Driver
         options = Options()
-        options.add_argument('--headless')
+        # options.add_argument('--headless')
         options.add_experimental_option('excludeSwitches', ['enable-logging', 'enable-automation'])
         self.driver = webdriver.Chrome(options=options)
 
