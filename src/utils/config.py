@@ -1,0 +1,46 @@
+# MENUS
+MENU_PRINCIPAL = """MENU PRINCIPAL
+[1] PRODUTOS
+[2] RELATÓRIOS
+[3] ENTIDADES
+[4] SAIR
+"""
+
+MENU_PRODUTOS = """PRODUTOS
+[1] INSERIR PRODUTO
+[2] EDITAR PRODUTO
+[3] PROCURAR PRODUTO
+[4] REMOVER PRODUTO
+[0] SAIR
+"""
+
+MENU_PEDIDOS = """PEDIDOS
+[1] NOVO PEDIDO
+[2] EDITAR PEDIDO
+[3] REMOVER PEDIDO
+[0] SAIR
+"""
+
+MENU_RELATORIOS = """RELATÓRIOS
+[1] RELATÓRIO PRODUTOS
+[2] RELATÓRIO MERCADOS
+[3] RELATÓRIO PEDIDOS
+[0] SAIR
+"""
+
+MENU_ENTIDADES = """ENTIDADES
+[1] PRODUTOS
+[2] MERCADOS
+[3] CARRINHO DE COMPRAS
+[4] PRODUTOS POR MERCADOS
+"""
+
+QUERY_COUNT = 'select count(1) as total_{tabela} from {tabela}'
+
+# FUNC PARA LIMPAR O CONSOLE
+def clear_console(wait_time:int=3):
+
+    import os
+    from time import sleep
+    sleep(wait_time)
+    os.system("clear")
