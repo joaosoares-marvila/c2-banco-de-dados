@@ -61,7 +61,7 @@ class Extrabom(Mercado):
 
             # Recupera preço do produto
             valor_unitario_produto = busca_elemento_CLASS(self.driver, 'valor').text
-            valor_unitario_produto = formata_preço(valor_unitario_produto)
+            valor_unitario_produto = formata_preco(valor_unitario_produto)
             
             # Recupera o código do produto
             codigo_produto = url_produto.split('/')[-2]
