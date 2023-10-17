@@ -63,14 +63,10 @@ class ControllerProdutoMercado():
 
             if not ControllerProdutoMercado.__verifica_existencia_produto_mercado(oracle=oracle,codigo=produto_perim.codigo):
                 
-
                 query = f"insert into produtos_mercados (codigo, descricao, valor_unitario, codigo_produto, CODIGO_MERCADO) values ('{produto_perim.codigo}', '{produto_perim.descricao}', {produto_perim.valor_unitario}, {produto_perim.produto.codigo}, {produto_perim.mercado.codigo} )"
-                
                 
                 oracle.write(query)
 
-                print('Inseriu')
-        
         
         if produto_extrabom is not None:
 

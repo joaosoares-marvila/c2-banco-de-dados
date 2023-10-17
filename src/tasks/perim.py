@@ -1,6 +1,11 @@
 # Não me orgulho dessa importação :(
-import sys
-sys.path.append('c:\\Users\\joaos\\Desktop\\Banco de dados\\c2-banco-de-dados\\src')
+import os
+from pathlib import Path
+
+diretorio_atual = Path(__file__).resolve()
+diretorio_src = diretorio_atual.parent.parent
+
+sys.path.append(diretorio_src)
 from model.mercados import Mercado
 from model.produtos_mercados import ProdutoMercado
 from model.produtos import Produto

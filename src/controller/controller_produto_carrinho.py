@@ -462,7 +462,7 @@ class ControllerProdutoCarrinho:
 
 
 if __name__ == "__main__":
-    # ControllerProdutoCarrinho.adicionar_produto()
+    ControllerProdutoCarrinho.adicionar_produto()
     # ControllerProdutoCarrinho.alterar_carrinho()
     # ControllerProdutoCarrinho.excluir_produto()
     ...

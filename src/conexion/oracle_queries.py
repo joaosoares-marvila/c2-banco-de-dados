@@ -1,6 +1,13 @@
 import json
 import oracledb
 from pandas import DataFrame
+import os
+from pathlib import Path
+
+
+diretorio_atual = Path(__file__).resolve()
+diretorio_conexion = diretorio_atual.parent
+diretorio_autentication = os.path.join(diretorio_conexion, 'passphrase', 'authentication.oracle')
 
 class OracleQueries:
     '''
@@ -28,7 +35,7 @@ class OracleQueries:
         self.service_name = 'XEPDB1'
         self.sid = 'xe'
 
-        with open(r"c:\Users\joaos\Desktop\Banco de dados\c2-banco-de-dados\src\conexion\passphrase\authentication.oracle", "r") as f:
+        with open(diretorio_autentication, "r") as f:
             self.user, self.passwd = f.read().split(',')
 
     def __del__(self):
