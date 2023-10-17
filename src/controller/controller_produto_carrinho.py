@@ -14,183 +14,255 @@ class ControllerProdutoCarrinho:
 
     @staticmethod
     def adicionar_produto():
+
+        # Inicializa a conexão com o banco de dados
+        oracle = OracleQueries(can_write=True)
+        oracle.connect()
         
         # Solicitar ao usuário que insira a descrição do produto que deseja buscar
         descricao_produto = input("Digite o nome do produto que deseja inserir: ")
 
+        # Valida se o usuário digitou algo
         if descricao_produto:
 
-            # Chama o método inserir_produto da classe ControllerProduto
-            produto = ControllerProduto.inserir_produto(descricao_produto=descricao_produto)
-            
-            if produto:
+            # Retorna um obejto Produto
+            produto = ControllerProduto.inserir_produto(oracle = oracle, descricao_produto=descricao_produto)
 
-                # Busca informações sobre o produto em diferentes mercados
-                produto_perim, produto_extrabom = ControllerProdutoMercado.busca_produtos_mercados(produto=produto)
+            # Busca informações sobre o produto nos mercados Perim e ExtraBom
+            produto_perim, produto_extrabom = ControllerProdutoMercado.busca_produtos_mercados(oracle= oracle, produto=produto)
 
+            # Produto encontrado em ambos os mercados
+            if produto_perim and produto_extrabom:
 
-                # Inicialize a conexão com o banco de dados
-                oracle = OracleQueries(can_write=True)
-                oracle.connect()
+                # Menu de opções
+                print(f'Foram encontrados produtos em ambos os mercados referentes ao produto {str(produto)}.')
+                print(f' 1 - \t {str(produto_perim)}')
+                print(f' 2 - \t {str(produto_extrabom)}')
+                print(f' 0 - \t Sair')
 
+                # Usuário escolhe a opção desejada
+                opcao = input('Selecione a opção desejada: ').strip()
 
-                # Produto encontrado em ambos os mercados
-                if produto_perim and produto_extrabom:
-                    print(f'Foram encontrados produtos em ambos os mercados referentes ao produto {str(produto)}.')
-                    print(f' 1 - \t {str(produto_perim)}')
-                    print(f' 2 - \t {str(produto_extrabom)}')
-                    print(f' 0 - \t Sair')
+                # Valida a opção escolhida pelo usuário
+                if opcao == '1': # Produto do mercado Perim
 
-                    opcao = input('Selecione a opção desejada: ').strip()
-
-                    if opcao == '1':
-                        quantidade = int(input('Digite quantas unidades você gostaria de adicionar ao carrinho: '))
-                        # Insira o produto no carrinho (mercado Perim)
-                        oracle.write(f"insert into produtos_carrinho (CODIGO_PRODUTO_MERCADO, QUANTIDADE) VALUES ({produto_perim.codigo}, {quantidade})")
-                        print(f'{quantidade} unidades do produto {produto_perim.descricao} foram adicionadas ao carrinho.')
+                    quantidade = int(input('Digite quantas unidades você gostaria de adicionar ao carrinho: '))
+                    # Insira o produto no carrinho (mercado Perim)
+                    oracle.write(f"insert into produtos_carrinho (CODIGO_PRODUTO_MERCADO, QUANTIDADE) VALUES ({produto_perim.codigo}, {quantidade})")
+                    print(f'{quantidade} unidades do produto {produto_perim.descricao} foram adicionadas ao carrinho.')
+                
+                elif opcao == '2': # Produto do mercado ExtraBom
                     
-                    elif opcao == '2':
-                        quantidade = int(input('Digite quantas unidades você gostaria de adicionar ao carrinho: '))
-                        # Insira o produto no carrinho (mercado ExtraBom)
-                        oracle.write(f"insert into produtos_carrinho (CODIGO_PRODUTO_MERCADO, QUANTIDADE) VALUES ({produto_extrabom.codigo}, {quantidade})")
-                        print(f'{quantidade} unidades do produto {produto_extrabom.descricao} foram adicionadas ao carrinho.')
+                    quantidade = int(input('Digite quantas unidades você gostaria de adicionar ao carrinho: '))
+                    # Insira o produto no carrinho (mercado ExtraBom)
+                    oracle.write(f"insert into produtos_carrinho (CODIGO_PRODUTO_MERCADO, QUANTIDADE) VALUES ({produto_extrabom.codigo}, {quantidade})")
+                    print(f'{quantidade} unidades do produto {produto_extrabom.descricao} foram adicionadas ao carrinho.')
+                
+                elif opcao == '0': # Sair do menu
                     
-                    elif opcao == '0':
-                        print('Saindo do menu de produtos.')
-                    
-                    else:
-                        print('Opção inválida. Voltando para a tela inicial.')
+                    print('Saindo do menu de produtos.')
+                
+                else: # Opção inválida
+
+                    print('Opção inválida. Voltando para a tela inicial.')
 
 
-                # Produto encontrado apenas no mercado Perim
-                elif produto_perim:
-                    print(f'Foram encontrados produtos apenas no mercado Perim referentes ao produto {str(produto)}.')
-                    print(f' 1 - \t {str(produto_perim)}')
-                    print(f' 0 - \t Sair')
+            # Produto encontrado apenas no mercado Perim
+            elif produto_perim:
 
-                    opcao = input('Selecione a opção desejada: ').strip()
+                # Menu de opções
+                print(f'Foram encontrados produtos apenas no mercado Perim referentes ao produto {str(produto)}.')
+                print(f' 1 - \t {str(produto_perim)}')
+                print(f' 0 - \t Sair')
 
-                    if opcao == '1':
-                        quantidade = int(input('Digite quantas unidades você gostaria de adicionar ao carrinho: '))
-                        # Insira o produto no carrinho (mercado Perim)
-                        oracle.write(f"insert into produtos_carrinho (CODIGO_PRODUTO_MERCADO, QUANTIDADE) VALUES ({produto_perim.codigo}, {quantidade})")
-                        print(f'{quantidade} unidades do produto {produto_perim.descricao} foram adicionadas ao carrinho.')
-                    
-                    elif opcao == '0':
-                        print('Saindo do menu de produtos.')
-                    
-                    else:
-                        print('Opção inválida. Voltando para a tela inicial.')
+                # Usuário escolhe a opção desejada
+                opcao = input('Selecione a opção desejada: ').strip()
 
+                # Valida a opção escolhida pelo usuário
+                if opcao == '1': # Produto do mercado Perim
 
-                # Produto encontrado apenas no mercado ExtraBom
-                elif produto_extrabom:
-                    print(f'Foram encontrados produtos apenas no mercado ExtraBom referentes ao produto {str(produto)}.')
-                    print(f' 1 - \t {str(produto_extrabom)}')
-                    print(f' 0 - \t Sair')
+                    quantidade = int(input('Digite quantas unidades você gostaria de adicionar ao carrinho: '))
+                    # Insira o produto no carrinho (mercado Perim)
+                    oracle.write(f"insert into produtos_carrinho (CODIGO_PRODUTO_MERCADO, QUANTIDADE) VALUES ({produto_perim.codigo}, {quantidade})")
+                    print(f'{quantidade} unidades do produto {produto_perim.descricao} foram adicionadas ao carrinho.')
+                
+                elif opcao == '0': # Sair do menu
 
-                    opcao = input('Selecione a opção desejada: ').strip()
+                    print('Saindo do menu de produtos.')
+                
+                else: # Opção inválida
 
-                    if opcao == '1':
-                        quantidade = int(input('Digite quantas unidades você gostaria de adicionar ao carrinho: '))
-                        # Insira o produto no carrinho (mercado Perim)
-                        oracle.write(f"insert into produtos_carrinho (CODIGO_PRODUTO_MERCADO, QUANTIDADE) VALUES ({produto_extrabom.codigo}, {quantidade})")
-                        print(f'{quantidade} unidades do produto {produto_extrabom.descricao} foram adicionadas ao carrinho.')
-                    
-                    elif opcao == '0':
-                        print('Saindo do menu de produtos.')
-                    
-                    else:
-                        print('Opção inválida. Voltando para a tela inicial.')
+                    print('Opção inválida. Voltando para a tela inicial.')
 
 
-                # Produto não encontrado
-                else:
-                    print(f'Não foi encontrado nenhum produto referente a {str(produto)}.')
-                    print('Voltando para a tela inicial.')
+            # Produto encontrado apenas no mercado ExtraBom
+            elif produto_extrabom:
 
+                # Menu de opções
+                print(f'Foram encontrados produtos apenas no mercado ExtraBom referentes ao produto {str(produto)}.')
+                print(f' 1 - \t {str(produto_extrabom)}')
+                print(f' 0 - \t Sair')
 
+                # Usuário escolhe a opção desejada
+                opcao = input('Selecione a opção desejada: ').strip()
+
+                if opcao == '1': # Produto do mercado ExtraBom
+                    quantidade = int(input('Digite quantas unidades você gostaria de adicionar ao carrinho: '))
+                    # Insira o produto no carrinho (mercado Perim)
+                    oracle.write(f"insert into produtos_carrinho (CODIGO_PRODUTO_MERCADO, QUANTIDADE) VALUES ({produto_extrabom.codigo}, {quantidade})")
+                    print(f'{quantidade} unidades do produto {produto_extrabom.descricao} foram adicionadas ao carrinho.')
+                
+                elif opcao == '0': # Sair do menu
+                    print('Saindo do menu de produtos.')
+                
+                else: # Opção inválida
+                    print('Opção inválida. Voltando para a tela inicial.')
+
+            # Não foi encontrado nenhum produto em ambos os mercados
+            else:
+                print(f'Não foi encontrado nenhum produto referente a {str(produto)}.')
+                print('Voltando para a tela inicial.')
+
+        oracle.close()
 
 
     @staticmethod
     def alterar_carrinho():
+
+        # Inicializa a conexão com o banco de dados
+        oracle = OracleQueries(can_write=True)
+        oracle.connect()
         
-        ControllerProdutoCarrinho.lista_todos_produtos()    
-        opcao = input('Digite o código do produto que deseja alterar')
+        # Valida se foi encontrado algum produto no carrinho de compras
+        if ControllerProdutoCarrinho.get_produtos_carrinho(oracle=oracle): 
+            
+            # Lista todos os produtos presentes no carrinho de compras
+            ControllerProduto.lista_todos_produtos()
 
-        data_frame_opcao_esclhida = oracle.sqlToDataFrame('select pc.codigo as codigo_produto_carrinho, p.codigo as codigo_produto, pm.codigo as codigo_produto_mercado, pc.quantidade from produtos_carrinho pc inner join produtos_mercados pm on pc.codigo_produto_mercado = pm.codigo inner join produtos p on pm.codigo_produto = p.codigo')
+            # Usuário escolhe a opção desejada
+            codigo_pruto_escolhido = int(input('\nDigite o código do produto que deseja alterar: '))
 
-        if not data_frame_opcao_esclhida.empty:
-            
-            codigo_produto_carrinho = data_frame_opcao_esclhida.iloc[0]['codigo_produto_carrinho']
-            codigo_produto = data_frame_opcao_esclhida.iloc[0]['codigo_produto']
-            codigo_produto_mercado = data_frame_opcao_esclhida.iloc[0]['codigo_produto_mercado']
-            quantidade = data_frame_opcao_esclhida.iloc[0]['quantidade']
+            # DataFrame do produto escolhido
+            produto_escolhido = ControllerProdutoCarrinho.get_produto_por_codigo(oracle=oracle, codigo=codigo_pruto_escolhido)
 
-            
-            print('1 - Alterar quantidade')
-            print('2 - Alterar produto (mercado)')
-            print('0 - Sair')
-            
-            opcao = input("Digite o número da opção desejada: ")
-            
-            if opcao == '1':
-            
-                nova_quantidade = int(input('Digite a quantidade desejada: '))
-                oracle.write(f'UPDATE produtos_carrinho SET quantidade = {nova_quantidade} WHERE codigo = {codigo_produto_carrinho}')
-                print('Produto atualizado! Voltando para a tela inicial...')
+            # Valida se foi encontrado algum produto no carrinho de compras com o código determinado
+            if not produto_escolhido.empty:
                 
-            elif opcao == '2':
+                # Converte o DataFrame em variáveis
+                codigo_produto_carrinho = data_frame_opcao_esclhida.iloc[0]['codigo']
+                codigo_produto = data_frame_opcao_esclhida.iloc[0]['codigo_produto']
+                codigo_produto_mercado = data_frame_opcao_esclhida.iloc[0]['codigo_produto_mercado']
+                quantidade = data_frame_opcao_esclhida.iloc[0]['quantidade']
 
-                produto = ControllerProduto.busca_produto_codigo(codigo_produto)
-                produto_perim, produto_extrabom =  ControllerProdutoMercado.busca_produtos_mercados_db(produto)
-
-                print('Produtos disponíveis: ')
+                # Exibe opções
+                print('1 - Alterar quantidade')
+                print('2 - Alterar produto (mercado)')
+                print('0 - Sair')
                 
-                if produto_extrabom and produto_perim:
-                    print(f'1 - {str(produto_perim)}')
-                    print(f'2 - {str(produto_extrabom)}')
-                    print(f'3 - Cancela alteração')
+                # Usuário esclhe a opção desejada
+                opcao = input("\nDigite o número da opção desejada: ")
                 
-                    opcao = input('Digite o código do produto que deseja selecionar: ')
+                if opcao == '1': # Alterar quantidade
+                
+                    # Nova quantidade do produto que já está presente no carrinho
+                    nova_quantidade = int(input('Digite a quantidade desejada: '))
                     
-                    if opcao == '1':
-                        ...
-                    elif opcao == '2':
-                        ...
-                    elif opcao == '3':
-                        ...
+                    # Verifica se a quantidade é maior que zero
+                    if quantidade > 0:  
+                        
+                        oracle.write(f'UPDATE produtos_carrinho SET quantidade = {nova_quantidade} WHERE codigo = {codigo_produto_carrinho}')
+                        print('Produto atualizado! Voltando para a tela inicial...')
+                    
                     else:
-                        ...
 
+                        print('Não é possível definir a quantidade como 0, volte ao menu principal e retire o produto do seu carrinho')
+
+                elif opcao == '2': # Alterar produto (mercado)
                     
-                elif produto_perim:
-                    print(f'1 - {str(produto_perim)}')
-                    print(f'2 - Cancela alteração')
+                    # Instancia um obejto Produto
+                    produto = ControllerProduto.busca_produto_codigo(oracle= oracle, codigo=codigo_produto)
                     
-                    if opcao == '1':
-                        ...
-                    elif opcao == '2':
-                        ...
-                    else:
-                        ...
+                    # Instancia dois objetos ProdutoMercado referentes aos mercados perim e ExtraBom
+                    produto_perim, produto_extrabom =  ControllerProdutoMercado.busca_produtos_mercados_db(produto)
 
-                elif produto_extrabom:
-                    print(f'1 - {str(produto_extrabom)}')
-                    print(f'2 - Cancela alteração')
+                    # Mensagem infotmativa
+                    print('Produtos disponíveis: ')
                     
-                    if opcao == '1':
-                        ...
-                    elif opcao == '2':
-                        ...
-                    else:
-                        ...
-                
+                    # Os produtos de ambos os mercados estão disponíveis
+                    if produto_extrabom and produto_perim:
+                        
+                        # Menu de opções
+                        print(f'1 - {str(produto_perim)}')
+                        print(f'2 - {str(produto_extrabom)}')
+                        print(f'3 - Cancela alteração')
+                    
+                        # Usuário escolhe a opção desejada
+                        opcao = input('Digite o código do produto que deseja: ')
+                        
+                        if opcao == '1': # Produto Perim
 
-        else:
-            print('Código inválido. Voltando ao menu inicial...')
+                            oracle.write(f"UPDATE produtos_carrinho SET codigo_produto_mercado = '{produto_perim.codigo}' WHERE codigo = {codigo_pruto_escolhido}")
+                            print(f"\nCarrinho alterado.")
+                        
+                        elif opcao == '2': # Produto ExtraBom
+                            oracle.write(f"UPDATE produtos_carrinho SET codigo_produto_mercado = '{produto_extrabom.codigo}' WHERE codigo = {codigo_pruto_escolhido}")
+                            print(f"\nCarrinho alterado.")
+                        
+                        elif opcao == '3': # Cancela alteração
+                            print("\nVoltando para o menu inicial...")
+                        
+                        else: # Opção inválida
+                            print("Opção inválida, voltando para o menu inicial...")
 
+                    # Apenas o produto do mercado Perim está disponível
+                    elif produto_perim:
+                        
+                        # Menu de opções
+                        print(f'1 - {str(produto_perim)}')
+                        print(f'2 - Cancela alteração')
+                        
+                        if opcao == '1': # Produto Perim
+                        
+                            oracle.write(f"UPDATE produtos_carrinho SET codigo_produto_mercado = '{produto_perim.codigo}' WHERE codigo = {codigo_pruto_escolhido}")
+                            print(f"\nCarrinho alterado.")
+                        
+                        elif opcao == '2': # Cancela alteração
+                        
+                            print("\nVoltando para o menu inicial...")
+                        
+                        else: # Opção inválida
+                        
+                            print("Opção inválida, voltando para o menu inicial...")
 
+                    # Apenas o produto do mercado ExtraBom está disponível
+                    elif produto_extrabom:
+
+                        # Menu de opções
+                        print(f'1 - {str(produto_extrabom)}')
+                        print(f'2 - Cancela alteração')
+                        
+                        if opcao == '1': # Produto ExtraBom
+
+                            oracle.write(f"UPDATE produtos_carrinho SET codigo_produto_mercado = '{produto_extrabom.codigo}' WHERE codigo = {codigo_pruto_escolhido}")
+                            print(f"\nCarrinho alterado.")
+                         
+                        elif opcao == '2': # Cancela alteração
+
+                            print("\nVoltando para o menu inicial...")
+                        
+                        else: # Opção inválida
+                        
+                            print("Opção inválida, voltando para o menu inicial...")
+
+                elif opcao  == '0': # Sair do menu
+                    
+                    print('Voltando ao menu inicial...')
+
+                else: # Código inválido
+
+                    print('Código inválido. Voltando ao menu inicial...')
+
+        oracle.close()
 
 
     def excluir_produto():
@@ -205,29 +277,102 @@ class ControllerProdutoCarrinho:
             ...
             
 
+    @staticmethod
+    def lista_todos_produtos(oracle = OracleQueries) -> bool:
+        """
+        Lista todos os produtos presentes no carrinho de compras.
 
+        Args:
+            oracle (OracleQueries, optional): Objeto de conexão Oracle. Defaults to OracleQueries.
 
+        """
+        
+        # Busca produtos presentes no carrinho de compras
+        produtos_carrinho = ControllerProdutoCarrinho.get_produtos_carrinho(oracle=oracle)
+
+        # 
+        if len(produtos_carrinho) > 0:
+
+            # Mensagem informativa
+            print("Produtos presentes no carrinho de compras:\n")
+            
+            # Itera os produtos presentes no carrinho de compras
+            for index, row in produtos_carrinho.iterrows():
+                codigo = row['codigo']
+                descricao_produto_mercado = row['descricao_produto_mercado']
+                valor_unitario = row['valor_unitario']
+                quantidade = row['quantidade']
+                total = valor_unitario * quantidade
+
+                # Imprimindo os valores formatados
+                print(f"Código: {codigo:<10} | Produto: {produto:<20} | Valor unitário: {valor_unitario:<8.2f} | Quantidade: {quantidade:<5} | Total:{total:<10.2f}")
+        
+            return True
+        
+        else:
+
+            print("Não há nenhum produto presente no carrinho de compras.")
+            
+            return 
+            
+    @staticmethod
+    def get_produtos_carrinho(oracle: OracleQueries) -> DataFrame:
+        """
+        Obtém os produtos presentes no carrinho de compras.
+
+        Args:
+            oracle (OracleQueries): Objeto de conexão Oracle.
+
+        Returns:
+            DataFrame: DataFrame contendo informações sobre os produtos no carrinho.
+
+            Campos de retorno:
+            - codigo: Código do produto no carrinho de compras.
+            - quantidade: Quantidade do produto no carrinho.
+            - codigo_produto: Código do produto.
+            - descricao_produto: Descrição do produto.
+            - codigo_produto_mercado: Código do produto no mercado.
+            - descricao_produto_mercado: Descrição do produto no mercado.
+            - valor_unitario: Valor unitário do produto no mercado.
+
+            Se não houver nenhum produto no carrinho, retorna None.
+        """
+        produtos_carrinho = oracle.sqlToDataFrame('SELECT pc.codigo as codigo, pc.quantidade, p.codigo as codigo_produto, p.descricao as descricao_produto, pm.codigo as codigo_produto_mercado, pm.descricao as descricao_produto_mercado, pm.valor_unitario FROM produtos_carrinho pc INNER JOIN produtos_mercados pm ON pc.codigo_produto_mercado = pm.codigo INNER JOIN produtos p ON pm.codigo_produto = p.codigo')
+
+        if len(produtos_carrinho) > 0:
+            return produtos_carrinho
+        else: 
+            return None
 
     @staticmethod
-    def lista_todos_produtos():
-        # Inicialize a conexão com o banco de dados
-        oracle = OracleQueries(can_write=True)
-        oracle.connect()
+    def get_produto_por_codigo(oracle: OracleQueries, codigo: int) -> DataFrame:
+        """
+        Obtém um produto específico do carrinho de acordo com o codigo.
+
+        Args:
+            oracle (OracleQueries): Objeto de conexão Oracle.
+
+        Returns:
+            DataFrame: DataFrame contendo informações sobre os produtos no carrinho.
+
+            Campos de retorno:
+            - codigo: Código do produto no carrinho de compras.
+            - quantidade: Quantidade do produto no carrinho.
+            - codigo_produto: Código do produto.
+            - descricao_produto: Descrição do produto.
+            - codigo_produto_mercado: Código do produto no mercado.
+            - descricao_produto_mercado: Descrição do produto no mercado.
+            - valor_unitario: Valor unitário do produto no mercado.
+
+            Se não houver nenhum produto no carrinho, retorna None.
+        """
         
-        produtos_carrinho = oracle.sqlToDataFrame('select pc.codigo, p.descricao as produto, pm.descricao as produto_mercado, pm.valor_unitario, pc.quantidade from produtos_carrinho pc inner join produtos_mercados pm on pc.codigo_produto_mercado = pm.codigo inner join produtos p on pm.codigo_produto = p.codigo')
+        produtos_carrinho = oracle.sqlToDataFrame('SELECT pc.codigo as codigo, pc.quantidade, p.codigo as codigo_produto, p.descricao as descricao_produto, pm.codigo as codigo_produto_mercado, pm.descricao as descricao_produto_mercado, pm.valor_unitario FROM produtos_carrinho pc INNER JOIN produtos_mercados pm ON pc.codigo_produto_mercado = pm.codigo INNER JOIN produtos p ON pm.codigo_produto = p.codigo')
 
-        # Iterar sobre cada linha
-        for index, row in produtos_carrinho.iterrows():
-            codigo = row['codigo']
-            produto = row['produto']
-            valor_unitario = row['valor_unitario']
-            quantidade = row['quantidade']
-            total = valor_unitario * quantidade
-
-            print(f"Código - {codigo} \t Produto: {produto} \t Valor unitário: {valor_unitario} \t Quantidade: {quantidade} \t Total: {total}")
-
-
-
+        if len(produtos_carrinho) > 0:
+            return produtos_carrinho
+        else: 
+            return None
 
 if __name__ == "__main__":
-    ControllerProdutoCarrinho.adicionar_produto()
+    ControllerProdutoCarrinho.alterar_carrinho()
