@@ -23,8 +23,6 @@ def menu_principal(opcao:int=0):
         editar_produto = produtos_carrinho.alterar_carrinho()
     elif opcao == 3:
         remover_produto = produtos_carrinho.excluir_produto()
-    elif opcao == 4:
-        procurar_produto = produto.procurar_produto()
 
 # CHAMADA MENU RELATÓRIOS
 def relatorios(opcao:int=0):
