@@ -53,9 +53,9 @@ class ControllerProdutoCarrinho:
 
                 # Menu de opções
                 print(f'\nForam encontrados produtos em ambos os mercados referentes ao produto "{produto.descricao}".')
-                print(f' 1 - \t {str(produto_perim)}')
-                print(f' 2 - \t {str(produto_extrabom)}')
-                print(f' 0 - \t Sair')
+                print(f' [1] \t {str(produto_perim)}')
+                print(f' [2] \t {str(produto_extrabom)}')
+                print(f' [0] - \t Sair')
 
                 # Usuário escolhe a opção desejada
                 opcao = input('Selecione a opção desejada: ').strip()
@@ -88,8 +88,8 @@ class ControllerProdutoCarrinho:
 
                 # Menu de opções
                 print(f'Foram encontrados produtos apenas no mercado Perim referentes ao produto {str(produto)}.')
-                print(f' 1 - \t {str(produto_perim)}')
-                print(f' 0 - \t Sair')
+                print(f' [1] \t {str(produto_perim)}')
+                print(f' [0] - \t Sair')
 
                 # Usuário escolhe a opção desejada
                 opcao = input('Selecione a opção desejada: ').strip()
@@ -115,8 +115,8 @@ class ControllerProdutoCarrinho:
 
                 # Menu de opções
                 print(f'Foram encontrados produtos apenas no mercado ExtraBom referentes ao produto {str(produto)}.')
-                print(f' 1 - \t {str(produto_extrabom)}')
-                print(f' 0 - \t Sair')
+                print(f' [1] - \t {str(produto_extrabom)}')
+                print(f' [0] - \t Sair')
 
                 # Usuário escolhe a opção desejada
                 opcao = input('Selecione a opção desejada: ').strip()
@@ -186,9 +186,9 @@ class ControllerProdutoCarrinho:
                 quantidade = produto_escolhido.iloc[0]['quantidade']
 
                 # Exibe opções
-                print('\n1 - Alterar quantidade')
-                print('2 - Alterar produto (mercado)')
-                print('0 - Sair')
+                print('\n[1] Alterar quantidade')
+                print('[2] - Alterar produto (mercado)')
+                print('[0] Sair')
                 
                 # Usuário escolhe a opção desejada
                 opcao = input("\nDigite o número da opção desejada: ")
@@ -223,9 +223,9 @@ class ControllerProdutoCarrinho:
                     if produto_extrabom and produto_perim:
                         
                         # Menu de opções
-                        print(f'1 - {str(produto_perim)}')
-                        print(f'2 - {str(produto_extrabom)}')
-                        print(f'3 - Cancela alteração')
+                        print(f'[1] {str(produto_perim)}')
+                        print(f'[2] {str(produto_extrabom)}')
+                        print(f'[3] Cancela alteração')
                     
                         # Usuário escolhe a opção desejada
                         opcao = input('Digite o código do produto que deseja: ')
@@ -249,8 +249,8 @@ class ControllerProdutoCarrinho:
                     elif produto_perim:
                         
                         # Menu de opções
-                        print(f'1 - {str(produto_perim)}')
-                        print(f'2 - Cancela alteração')
+                        print(f'[1] {str(produto_perim)}')
+                        print(f'[2] Cancela alteração')
                         
                         # Usuário escolhe a opção desejada
                         opcao = input('Digite o código do produto que deseja: ')
@@ -272,8 +272,8 @@ class ControllerProdutoCarrinho:
                     elif produto_extrabom:
 
                         # Menu de opções
-                        print(f'1 - {str(produto_extrabom)}')
-                        print(f'2 - Cancela alteração')
+                        print(f'[1] - {str(produto_extrabom)}')
+                        print(f'[2] - Cancela alteração')
                         
                         # Usuário escolhe a opção desejada
                         opcao = input('Digite o código do produto que deseja: ')
