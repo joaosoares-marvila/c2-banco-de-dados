@@ -1,5 +1,5 @@
 SELECT 
     p.codigo,
     p.descricao
-FROM produto p
+FROM produtos p
 ORDER BY p.descricao

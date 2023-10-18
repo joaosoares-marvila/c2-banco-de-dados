@@ -52,7 +52,7 @@ class ControllerProdutoCarrinho:
             if produto_perim and produto_extrabom:
 
                 # Menu de opções
-                print(f'Foram encontrados produtos em ambos os mercados referentes ao produto {str(produto)}.')
+                print(f'\nForam encontrados produtos em ambos os mercados referentes ao produto "{produto.descricao}".')
                 print(f' 1 - \t {str(produto_perim)}')
                 print(f' 2 - \t {str(produto_extrabom)}')
                 print(f' 0 - \t Sair')

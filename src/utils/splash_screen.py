@@ -1,5 +1,6 @@
-from conexion.oracle_queries import OracleQueries
-from utils import config
+
+from src.conexion.oracle_queries import OracleQueries
+from src.utils import config
 
 class SplashScreen:
 
@@ -12,7 +13,10 @@ class SplashScreen:
 
 
         # Nome(s) do(s) criador(es)
-        self.created_by = "Cristian Menezes, Enzo Galão, Gabriel Schunk, Higor Soares, João Pedro Guidolini, João Vitor Marvila"
+        self.created_by = """   Cristian Menezes, Enzo Galão, 
+                          Gabriel Schunk, Higor Soares,
+                          João Pedro Guidolini, João Vitor Marvila"""
+                                
         self.professor = "Prof. M.Sc. Howard Roatti"
         self.disciplina = "Banco de Dados"
         self.semestre = "2023/2"
@@ -48,8 +52,8 @@ class SplashScreen:
         #  TOTAL DE REGISTROS:                                    
         #      1 - PRODUTOS:              {str(self.get_total_produtos()).rjust(5)}
         #      2 - MERCADOS:              {str(self.get_total_mercados()).rjust(5)}
-        #      3 - PRODUTOS DO CARRINHO:     {str(self.get_total_pedidos()).rjust(5)}
-        #      4 - PRODUTOS POR MERCADO:  {str(self.get_total_produtos_mercado()).rjust(5)}
+        #      3 - PRODUTOS DO CARRINHO:     {str(self.get_total_produtos_carrinho()).rjust(5)}
+        #      4 - PRODUTOS POR MERCADO:  {str(self.get_total_produtos_mercados()).rjust(5)}
         #
         #
         #  CRIADO POR: {self.created_by}

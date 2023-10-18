@@ -1,4 +1,4 @@
-MENU_PRINCIPAL = """[MENU PRINCIPAL]
+MENU_PRINCIPAL = """ --- MENU PRINCIPAL ---
 [1] ADICIONAR PRODUTO AO CARRINHO
 [2] ALTERAR PRODUTO DO CARRINHO
 [3] REMOVER PRODUTO DO CARRINHO 
@@ -6,7 +6,7 @@ MENU_PRINCIPAL = """[MENU PRINCIPAL]
 [0] SAIR
 """
 
-MENU_RELATORIOS = """[RELATORIOS]
+MENU_RELATORIOS = """ --- RELATORIOS ---
 [1] PRODUTOS
 [2] MERCADOS
 [3] PRODUTOS DOS MERCADOS
@@ -24,4 +24,4 @@ def clear_console(wait_time:int=3):
     import os
     from time import sleep
     sleep(wait_time)
-    os.system("clear")
+    os.system("cls")

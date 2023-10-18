@@ -1,4 +1,5 @@
 # Não me orgulho dessa importação :(
+import sys
 import os
 from pathlib import Path
 
