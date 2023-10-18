@@ -1,9 +1,12 @@
-# Loguru
-from loguru import logger
-
 # Não me orgulho dessa importação :(
 import sys
-sys.path.append('c:\\Users\\joaos\\Desktop\\Banco de dados\\c2-banco-de-dados\\src')
+import os
+from pathlib import Path
+
+diretorio_atual = Path(__file__).resolve()
+diretorio_src = diretorio_atual.parent.parent
+
+sys.path.append(diretorio_src)
 from model.mercados import Mercado
 from model.produtos_mercados import ProdutoMercado
 from model.produtos import Produto
@@ -36,46 +39,52 @@ class Perim(Mercado):
     """
 
     def __init__(self) -> None:
-
         super().__init__(
             codigo = 1,
-            url = 'https://www.perim.com.br/produtos/buscas?q=',
             nome = 'Perim'
         )
         
     def busca_produto(self, produto: Produto) -> None:
+        """
+        Busca as informações de um produto no mercado Perim.
 
-        # --------- Iniciando task ---------
-        self.driver.get(f'{self.url}{produto.descricao}')
+        Args:
+        - produto (Produto): O produto a ser buscado no mercado.
 
+        Returns:
+        - ProdutoMercado: O objeto ProdutoMercado contendo as informações do produto no mercado Perim, ou None se o produto não for encontrado.
 
-        # --------- Busca produto ---------
+        A função executa as seguintes etapas:
+        1. Inicializa a busca do produto na página do mercado Perim.
+        2. Recupera a URL, descrição e preço do produto.
+        3. Cria um objeto ProdutoMercado com as informações coletadas.
+
+        """
         try:
+            self.driver.get(f'{"https://www.perim.com.br/produtos/buscas?q="}{produto.descricao}')
             # Recupera url do produto
             url_produto = busca_elemento_XPATH(self.driver, '/html/body/app-root/app-produto-busca/div/div/div[1]/div/div[1]/app-produto-card/div/div/app-produto-imagem/a').get_attribute('href')
             self.driver.get(url_produto)
             
-            # Recupera titulo do produto
+            # Recupera título do produto
             descricao_produto = busca_elemento_XPATH(self.driver, '//*[@id="product"]/div/h3').text
 
-            # Recupera preco do produto
+            # Recupera preço do produto
             valor_unitario_produto = busca_elemento_XPATH(self.driver, '//*[@id="product"]/div/app-tag-preco/div/div[2]').text
             valor_unitario_produto = formata_preco(valor_unitario_produto)
             
-            # Recupera o codigo do produto
+            # Recupera o código do produto
             codigo_produto = url_produto.split('/')[-2]
 
             # Instancia o produto
-            produto_mercado = ProdutoMercado(codigo= codigo_produto, descricao= descricao_produto, produto= produto, mercado= self,  valor_unitario= valor_unitario_produto)
+            produto_mercado = ProdutoMercado(codigo=codigo_produto, descricao=descricao_produto, produto=produto, mercado=self, valor_unitario=valor_unitario_produto)
 
             return produto_mercado
         except:
             return None
 
-
 if __name__ == '__main__':
-    
-    perim = Perim()
-    perim.busca_produto(produto='Feijão')
-
+    # perim = Perim()
+    # perim.busca_produto(produto='Feijão')
+    ...
 

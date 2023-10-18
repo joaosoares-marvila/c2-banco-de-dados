@@ -1,11 +1,16 @@
-# Loguru
-from loguru import logger
-
 # Não me orgulho dessa importação :(
 import sys
-sys.path.append('c:\\Users\\joaos\\Desktop\\Banco de dados\\c2-banco-de-dados\\src')
+
+import os
+from pathlib import Path
+
+diretorio_atual = Path(__file__).resolve()
+diretorio_src = diretorio_atual.parent.parent
+
+sys.path.append(diretorio_src)
 from model.mercados import Mercado
 from model.produtos import Produto
+from model.produtos_mercados import ProdutoMercado
 
 # Utils
 from tasks.utils.utils import (
@@ -27,55 +32,63 @@ class Extrabom(Mercado):
     - produtos_referencia (list): Uma lista de produtos de referência para buscar no mercado.
 
     Methods:
-    - run(driver: webdriver.Chrome): Executa a tarefa principal de automação no mercado Extrabom.
+    - busca_produto(produto: Produto) -> ProdutoMercado: Busca um produto no mercado Extrabom e retorna um objeto ProdutoMercado.
 
     Exemplo de uso:
     >>> extrabom = Extrabom()
-    >>> extrabom.run(webdriver.Chrome(options))
+    >>> extrabom.busca_produto(produto)
     """
 
     def __init__(self) -> None:
-
         super().__init__(
-            codigo = 1,
-            url = 'https://www.extrabom.com.br/busca/?q=',
+            codigo = 2,
             nome = 'ExtraBom'
         )
         
-    def busca_produto(self, produto: str) -> None:
+    def busca_produto(self, produto: Produto) -> ProdutoMercado:
+        """
+        Busca um produto no mercado Extrabom e retorna um objeto ProdutoMercado.
 
-        # --------- Iniciando task ---------
-        self.driver.get(f'{self.url}{produto}')
+        Args:
+        - produto (Produto): O produto a ser buscado no mercado.
 
+        Returns:
+        - ProdutoMercado: O objeto ProdutoMercado com informações do produto encontrado no mercado Extrabom.
+        """
+        try:
+            self.driver.get(f'{"https://www.extrabom.com.br/busca/?q="}{produto.descricao}')
 
-        # --------- Busca produto ---------
-        # Recupera url do produto
-        url_produto = busca_elemento_XPATH(self.driver, '//*[@id="conteudo"]/div[2]/div[1]/div[1]/div/div/div[2]/div[1]/a').get_attribute('href')
-        self.driver.get(url_produto)
-        
-        # Recupera titulo do produto
-        titulo_produto = busca_elemento_XPATH(self.driver, '//*[@id="conteudo"]/div[2]/div/div/div/div[2]/div/h1').text
+            # --------- Busca produto ---------
+            # Recupera url do produto
+            url_produto = busca_elemento_XPATH(self.driver, '//*[@id="conteudo"]/div[2]/div[1]/div[1]/div/div/div[2]/div[1]/a').get_attribute('href')
+            self.driver.get(url_produto)
+            
+            # Recupera título do produto
+            descricao_produto = busca_elemento_XPATH(self.driver, '//*[@id="conteudo"]/div[2]/div/div/div/div[2]/div/h1').text
 
-        # Recupera preco do produto
-        valor_unitario_produto = busca_elemento_CLASS(self.driver, 'valor').text
-        valor_unitario_produto = formata_preco(valor_unitario_produto)
-        
+            # Recupera preço do produto
+            valor_unitario_produto = busca_elemento_CLASS(self.driver, 'valor').text
+            valor_unitario_produto = formata_preco(valor_unitario_produto)
+            
+            # Recupera o código do produto
+            codigo_produto = url_produto.split('/')[-2]
 
-        codigo_produto = url_produto.split('/')[-2]
+            # Instancia o objeto ProdutoMercado
+            produto_mercado = ProdutoMercado(codigo=codigo_produto, descricao=descricao_produto, produto=produto, mercado=self, valor_unitario=valor_unitario_produto)
 
-        logger.info(f'Titulo: {titulo_produto}')
-        logger.info(f'Código: {codigo_produto}')
-        logger.info(f'Preço: {valor_unitario_produto}')
-        logger.info(f'url: {url_produto}\n')
+            return produto_mercado
 
-        return codigo_produto, titulo_produto, valor_unitario_produto, self.codigo
-
+        except Exception as e:
+            print(e)
+            return None
 
 if __name__ == '__main__':
-    
-
-    # ExtaBom
-    extrabom = Extrabom()
-    extrabom.busca_produto(produto='Feijão')
-
-
+    # Extrabom
+    # extrabom = Extrabom()
+    # produto = Produto(descricao='Feijão')  # Substitua 'Feijão' pelo nome do produto desejado
+    # produto_mercado = extrabom.busca_produto(produto)
+    # if produto_mercado:
+    #     print(f"Produto encontrado no mercado Extrabom: {produto_mercado.descricao}")
+    # else:
+    #     print("Produto não encontrado no mercado Extrabom.")
+    ...

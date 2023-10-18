@@ -1,10 +1,17 @@
 import json
-import cx_Oracle as ora
+import oracledb
 from pandas import DataFrame
+import os
+from pathlib import Path
+
+
+diretorio_atual = Path(__file__).resolve()
+diretorio_conexion = diretorio_atual.parent
+diretorio_autentication = os.path.join(diretorio_conexion, 'passphrase', 'authentication.oracle')
 
 class OracleQueries:
     '''
-    Classe para auxiliar na conexão com o Banco de Dados Oracle usando a biblioteca python-oracledb.
+    Classe para auxiliar na conexão com o Banco de Dados Oracle usando a biblioteca oracledb.
     '''
 
     def __init__(self, can_write: bool = False):
@@ -26,9 +33,9 @@ class OracleQueries:
         self.host = "localhost"
         self.port = 1521
         self.service_name = 'XEPDB1'
-        self.sid = 'XE'
+        self.sid = 'xe'
 
-        with open(r"c:\Users\joaos\Desktop\Banco de dados\c2-banco-de-dados\src\conexion\passphrase\authentication.oracle", "r") as f:
+        with open(diretorio_autentication, "r") as f:
             self.user, self.passwd = f.read().split(',')
 
     def __del__(self):
@@ -47,8 +54,9 @@ class OracleQueries:
 
         '''
         if not hasattr(self, 'conn'):
-            dsn = ora.makedsn(self.host, self.port, service_name=self.service_name if self.service_name else self.sid)
-            self.conn = ora.connect(self.user, self.passwd, dsn=dsn)
+            # dsn = f'{self.user}/{self.passwd}@{self.host}:{self.port}/{self.service_name}'
+            # dsn = oracledb.makedsn(self.host, self.port, service_name=self.service_name if self.service_name else self.sid)
+            self.conn = oracledb.connect(user=self.user, password=self.passwd, dsn=f'{self.host}/{self.sid}', mode=oracledb.SYSDBA)
             self.cur = self.conn.cursor()
         return self.cur
 
@@ -119,9 +127,11 @@ class OracleQueries:
         if not self.can_write:
             raise Exception('Não é possível escrever usando esta conexão')
 
+
         cur = self.connect()
         cur.execute(query)
         self.conn.commit()
+       
 
     def close(self):
         '''
