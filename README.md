@@ -14,6 +14,8 @@ Para criar as tabelas necessárias e inserir os dados do mercado, siga estas eta
 
 2. Abra o arquivo `sql/inserting_samples_records.sql` e faça a mesma verificação.
 
+3. Abra o arquivo `utils/config.py` e faça a mesma verificação.
+
 ## Execução dos Scripts
 
 Após configurar as credenciais e verificar os arquivos SQL, você pode iniciar a execução dos scripts. Certifique-se de que o Python 3.9 esteja instalado em sua máquina com o seguinte comando:
