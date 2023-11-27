@@ -35,7 +35,11 @@ def relatorios(opcao:int=0):
         relatorio.get_relatorio_produtos_mercados()
     elif opcao == 4:
         relatorio.get_relatorio_produtos_carrinho()
+    elif opcao == 5:
+        relatorio.get_total_por_mercado()
 
+    input()
+        
 # MÉTODO PRINCIPAL
 def run():
 
@@ -52,42 +56,71 @@ def run():
         # Adicionar novo produto ao carrinho
         if opcao == 1:
 
-            menu_principal(opcao=opcao)
-            config.clear_console()
-            
-            print(tela_inicial.get_updated_screen())
-            config.clear_console()
+            while True:
+
+                menu_principal(opcao=opcao)
+                config.clear_console()
+                
+                print(tela_inicial.get_updated_screen())
+                config.clear_console()
+
+                continuar = input('Deseja inserir mais algum registro? digite "SIM" para inserir, digite "NAO" para voltar ao menu de opções: ')
+
+                if continuar.lower() == 'nao':
+                    config.clear_console()
+                    break
 
         # Alterar produtos
         elif opcao == 2:
-
-            menu_principal(opcao=opcao)
-            config.clear_console()
             
-            print(tela_inicial.get_updated_screen())
-            config.clear_console()
+            while True:
 
-        # Remover produt2os
+                menu_principal(opcao=opcao)
+                config.clear_console()
+                
+                print(tela_inicial.get_updated_screen())
+                config.clear_console()
+
+                continuar = input('Deseja atualizar mais algum registro? digite "SIM" para atualizar, digite "NAO" para voltar ao menu de opções: ')
+
+                if continuar.lower() == 'nao':
+                    config.clear_console()
+                    break
+
+        # Remover produtos
         elif opcao == 3:
-
-            menu_principal(opcao=opcao)
-            config.clear_console()
             
-            print(tela_inicial.get_updated_screen())
-            config.clear_console()
+            while True:
+                menu_principal(opcao=opcao)
+                config.clear_console()
+                
+                print(tela_inicial.get_updated_screen())
+                config.clear_console()
+
+                continuar = input('Deseja remover mais algum registro? digite "SIM" para remover, digite "NAO" para voltar ao menu de opções: ')
+
+                if continuar.lower() == 'nao':
+                    config.clear_console()
+                    break
 
         # Relatórios
         elif opcao == 4:
-            
-            print(config.MENU_RELATORIOS)
-            opcao_relatorio = int(input("Escolha uma opção [0-4]: "))
-            config.clear_console()
+            while True:
+                print(config.MENU_RELATORIOS)
+                opcao_relatorio = int(input("Escolha uma opção [0-5]: "))
+                config.clear_console()
 
-            relatorios(opcao=opcao_relatorio)
-            config.clear_console()
-            
-            print(tela_inicial.get_updated_screen())
-            config.clear_console()
+                relatorios(opcao=opcao_relatorio)
+                config.clear_console()
+                
+                print(tela_inicial.get_updated_screen())
+                config.clear_console()
+
+                continuar = input('Deseja remover mais algum registro? digite "SIM" para remover, digite "NAO" para voltar ao menu de opções: ')
+
+                if continuar.lower() == 'nao':
+                    config.clear_console()
+                    break
 
         # Sair do sistema
         elif opcao == 0:

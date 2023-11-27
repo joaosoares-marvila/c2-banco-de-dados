@@ -2,21 +2,20 @@ import sys
 import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-
+import pandas
 from model.produtos_carrinho import ProdutoCarrinho
 from controller.controller_produto import ControllerProduto
 from controller.controller_produto_mercado import ControllerProdutoMercado
-from conexion.oracle_queries import OracleQueries
+from conexion.mongo_queries import MongoQueries
 
 from pandas import DataFrame
 
 
 class ControllerProdutoCarrinho:
     def __init__(self):
-        pass
+        self.mongo = MongoQueries()
 
-    @staticmethod
-    def adicionar_produto():
+    def adicionar_produto(self):
         """
         Permite ao usuário adicionar um produto ao carrinho de compras, escolhendo a quantidade e o mercado.
 
@@ -32,21 +31,30 @@ class ControllerProdutoCarrinho:
         5. Fecha a conexão com o banco de dados.
 
         """
-        # Inicializa a conexão com o banco de dados
-        oracle = OracleQueries(can_write=True)
-        oracle.connect()
-        
+
+        # Abre a conexão com o Mongo
+        self.mongo.connect()
+
         # Solicitar ao usuário que insira a descrição do produto que deseja buscar
         descricao_produto = input("Digite o nome do produto que deseja inserir: ")
 
+        ctrl_produto = ControllerProduto()
+        ctrl_produto_mercado = ControllerProdutoMercado()
+
         # Valida se o usuário digitou algo
         if descricao_produto:
-
+            
             # Retorna um objeto Produto
-            produto = ControllerProduto.inserir_produto(oracle=oracle, descricao_produto=descricao_produto)
+            produto = ctrl_produto.inserir_produto(descricao_produto=descricao_produto)
 
             # Busca informações sobre o produto nos mercados Perim e ExtraBom
-            produto_perim, produto_extrabom = ControllerProdutoMercado.busca_produtos_mercados(oracle=oracle, produto=produto)
+            produto_perim, produto_extrabom = ctrl_produto_mercado.busca_produtos_mercados(produto=produto)
+
+            # Obtém o próximo valor para o campo "codigo"
+            ultimo_documento = self.mongo.db['produtos_carrinho'].find_one(sort=[("codigo", -1)])
+
+            # Calcula o próximo código (incrementando 1 ao último código se existir, caso contrário, inicia em 1)
+            proximo_codigo = (ultimo_documento["codigo"] + 1) if ultimo_documento else 1
 
             # Produto encontrado em ambos os mercados
             if produto_perim and produto_extrabom:
@@ -55,31 +63,50 @@ class ControllerProdutoCarrinho:
                 print(f'\nForam encontrados produtos em ambos os mercados referentes ao produto "{produto.descricao}".')
                 print(f' [1] \t {str(produto_perim)}')
                 print(f' [2] \t {str(produto_extrabom)}')
-                print(f' [0] - \t Sair')
+                print(f' [0] \t Sair')
 
                 # Usuário escolhe a opção desejada
                 opcao = input('Selecione a opção desejada: ').strip()
 
-                # Valida a opção escolhida pelo usuário
-                if opcao == '1':  # Produto do mercado Perim
+                # Produto do mercado Perim
+                if opcao == '1':  
 
+                    # Input de unidades(quantidade)
                     quantidade = int(input('Digite quantas unidades você gostaria de adicionar ao carrinho: '))
-                    # Insira o produto no carrinho (mercado Perim)
-                    oracle.write(f"insert into produtos_carrinho (CODIGO_PRODUTO_MERCADO, QUANTIDADE) VALUES ({produto_perim.codigo}, {quantidade})")
+
+                    # Insere o produto no carrinho (mercado Perim)
+                    self.mongo.db["produtos_carrinho"].insert_one({
+                        "codigo": proximo_codigo,
+                        "codigo_produto_mercado": produto_perim.codigo, 
+                        "quantidade": quantidade
+                    })
+
+                    # Exibe mesagem de x produtos adicionados ao carrinho
                     print(f'{quantidade} unidades do produto {produto_perim.descricao} foram adicionadas ao carrinho.')
-                
-                elif opcao == '2':  # Produto do mercado ExtraBom
-                    
+
+                # Produto do mercado ExtraBom
+                elif opcao == '2':
+
+                    # Input de unidades(quantidade)
                     quantidade = int(input('Digite quantas unidades você gostaria de adicionar ao carrinho: '))
-                    # Insira o produto no carrinho (mercado ExtraBom)
-                    oracle.write(f"insert into produtos_carrinho (CODIGO_PRODUTO_MERCADO, QUANTIDADE) VALUES ({produto_extrabom.codigo}, {quantidade})")
+
+                    # Insere o produto no carrinho (mercado ExtraBom)
+                    self.mongo.db["produtos_carrinho"].insert_one({
+                        "codigo": proximo_codigo,
+                        "codigo_produto_mercado": produto_extrabom.codigo, 
+                        "quantidade": quantidade
+                    })
+
+                    # Exibe mesagem de x produtos adicionados ao carrinho
                     print(f'{quantidade} unidades do produto {produto_extrabom.descricao} foram adicionadas ao carrinho.')
-                
-                elif opcao == '0':  # Sair do menu
-                    
+
+                # Sair do menu
+                elif opcao == '0':
+
                     print('Saindo do menu de produtos.')
-                
-                else:  # Opção inválida
+
+                # Opção inválida
+                else:
 
                     print('Opção inválida. Voltando para a tela inicial.')
 
@@ -89,24 +116,34 @@ class ControllerProdutoCarrinho:
                 # Menu de opções
                 print(f'Foram encontrados produtos apenas no mercado Perim referentes ao produto {str(produto)}.')
                 print(f' [1] \t {str(produto_perim)}')
-                print(f' [0] - \t Sair')
+                print(f' [0] \t Sair')
 
                 # Usuário escolhe a opção desejada
                 opcao = input('Selecione a opção desejada: ').strip()
 
-                # Valida a opção escolhida pelo usuário
-                if opcao == '1':  # Produto do mercado Perim
+                # Produto do mercado Perim
+                if opcao == '1':
 
+                    # Input de unidades(quantidade)
                     quantidade = int(input('Digite quantas unidades você gostaria de adicionar ao carrinho: '))
-                    # Insira o produto no carrinho (mercado Perim)
-                    oracle.write(f"insert into produtos_carrinho (CODIGO_PRODUTO_MERCADO, QUANTIDADE) VALUES ({produto_perim.codigo}, {quantidade})")
+
+                    # Insere o produto no carrinho (mercado ExtraBom)
+                    self.mongo.db["produtos_carrinho"].insert_one({
+                        "codigo": proximo_codigo,
+                        "codigo_produto_mercado": produto_perim.codigo, 
+                        "quantidade": quantidade
+                    })
+
+                    # Exibe mesagem de x produtos adicionados ao carrinho
                     print(f'{quantidade} unidades do produto {produto_perim.descricao} foram adicionadas ao carrinho.')
-                
-                elif opcao == '0':  # Sair do menu
+
+                # Sair do menu
+                elif opcao == '0':
 
                     print('Saindo do menu de produtos.')
                 
-                else:  # Opção inválida
+                # Opção inválida
+                else:
 
                     print('Opção inválida. Voltando para a tela inicial.')
 
@@ -115,22 +152,35 @@ class ControllerProdutoCarrinho:
 
                 # Menu de opções
                 print(f'Foram encontrados produtos apenas no mercado ExtraBom referentes ao produto {str(produto)}.')
-                print(f' [1] - \t {str(produto_extrabom)}')
-                print(f' [0] - \t Sair')
+                print(f' [1] \t {str(produto_extrabom)}')
+                print(f' [0] \t Sair')
 
                 # Usuário escolhe a opção desejada
                 opcao = input('Selecione a opção desejada: ').strip()
 
-                if opcao == '1':  # Produto do mercado ExtraBom
+                # Produto do mercado ExtraBom
+                if opcao == '1':  
+                    
+                    # Input de unidades(quantidade)
                     quantidade = int(input('Digite quantas unidades você gostaria de adicionar ao carrinho: '))
-                    # Insira o produto no carrinho (mercado Perim)
-                    oracle.write(f"insert into produtos_carrinho (CODIGO_PRODUTO_MERCADO, QUANTIDADE) VALUES ({produto_extrabom.codigo}, {quantidade})")
+
+                    # Insere o produto no carrinho (mercado ExtraBom)
+                    self.mongo.db["produtos_carrinho"].insert_one({
+                        "codigo": proximo_codigo,
+                        "codigo_produto_mercado": produto_extrabom.codigo, 
+                        "quantidade": quantidade
+                    })
+
+                    # Exibe mesagem de x produtos adicionados ao carrinho
                     print(f'{quantidade} unidades do produto {produto_extrabom.descricao} foram adicionadas ao carrinho.')
-                
-                elif opcao == '0':  # Sair do menu
+
+                # Sair do menu
+                elif opcao == '0':  
+
                     print('Saindo do menu de produtos.')
                 
-                else:  # Opção inválida
+                # Opção inválida
+                else:
                     print('Opção inválida. Voltando para a tela inicial.')
 
             # Não foi encontrado nenhum produto em ambos os mercados
@@ -138,10 +188,11 @@ class ControllerProdutoCarrinho:
                 print(f'Não foi encontrado nenhum produto referente a {str(produto)}.')
                 print('Voltando para a tela inicial.')
 
-        oracle.close()
+        self.mongo.close()
 
-    @staticmethod
-    def alterar_carrinho():
+
+
+    def alterar_carrinho(self):
         """
         Permite ao usuário fazer alterações em um produto do carrinho de compras, incluindo a modificação da quantidade ou a escolha de um produto diferente do mercado.
 
@@ -158,36 +209,39 @@ class ControllerProdutoCarrinho:
 
         """
 
-        # Inicializa a conexão com o banco de dados
-        oracle = OracleQueries(can_write=True)
-        oracle.connect()
-        
-        # Valida se foi encontrado algum produto no carrinho de compras
-        produtos_carrinho = ControllerProdutoCarrinho.get_produtos_carrinho(oracle=oracle)
+        self.mongo.connect()
 
-        if produtos_carrinho is not None:
+        ctrl_produto_carrinho = ControllerProdutoCarrinho()
+        ctrl_produto = ControllerProduto()
+        ctrl_produto_mercado = ControllerProdutoMercado()
+        
+
+        # Valida se foi encontrado algum produto no carrinho de compras
+        produtos_carrinho = ctrl_produto_carrinho.verifica_produtos_carrinho()
+
+        if produtos_carrinho:
 
             # Lista todos os produtos presentes no carrinho de compras
-            ControllerProdutoCarrinho.lista_todos_produtos(oracle=oracle)
+            ctrl_produto_carrinho.lista_todos_produtos()
 
             # Usuário escolhe a opção desejada
             codigo_pruto_escolhido = int(input('\nDigite o código do produto que deseja alterar: '))
 
             # DataFrame do produto escolhido
-            produto_escolhido = ControllerProdutoCarrinho.get_produto_por_codigo(oracle=oracle, codigo=codigo_pruto_escolhido)
+            produto_escolhido = ctrl_produto_carrinho.get_produto_por_codigo(codigo=codigo_pruto_escolhido)
 
             # Valida se foi encontrado algum produto no carrinho de compras com o código determinado
             if produto_escolhido is not None:
                 
                 # Converte o DataFrame em variáveis
-                codigo_produto_carrinho = produto_escolhido.iloc[0]['codigo']
-                codigo_produto = produto_escolhido.iloc[0]['codigo_produto']
-                codigo_produto_mercado = produto_escolhido.iloc[0]['codigo_produto_mercado']
-                quantidade = produto_escolhido.iloc[0]['quantidade']
+                codigo_produto_carrinho = produto_escolhido['codigo']
+                codigo_produto = produto_escolhido['codigo_produto']
+                codigo_produto_mercado = produto_escolhido['codigo_produto_mercado']
+                quantidade = produto_escolhido['quantidade']
 
                 # Exibe opções
                 print('\n[1] Alterar quantidade')
-                print('[2] - Alterar produto (mercado)')
+                print('[2]  Alterar produto (mercado)')
                 print('[0] Sair')
                 
                 # Usuário escolhe a opção desejada
@@ -201,20 +255,25 @@ class ControllerProdutoCarrinho:
                     # Verifica se a quantidade é maior que zero
                     if quantidade > 0:  
                         
-                        oracle.write(f'UPDATE produtos_carrinho SET quantidade = {nova_quantidade} WHERE codigo = {codigo_produto_carrinho}')
-                        print('\nProduto atualizado! Voltando para a tela inicial...')
-                    
+                        self.mongo.db['produtos_carrinho'].update_one(
+                            {"codigo": codigo_produto_carrinho},
+                            {"$set": {"quantidade": nova_quantidade}}
+                        )
+
+                        ctrl_produto_carrinho.exibe_produto_atualizado(codigo_produto_carrinho)
+                   
                     else:
 
                         print('\nNão é possível definir a quantidade como 0, volte ao menu principal e retire o produto do seu carrinho')
 
                 elif opcao == '2':  # Alterar produto (mercado)
                     
+
                     # Instancia um objeto Produto
-                    produto = ControllerProduto.busca_produto_codigo(oracle=oracle, codigo=codigo_produto)
+                    produto = ctrl_produto.busca_produto_codigo(codigo=codigo_produto)
                     
                     # Instancia dois objetos ProdutoMercado referentes aos mercados Perim e ExtraBom
-                    produto_perim, produto_extrabom = ControllerProdutoMercado.busca_produtos_mercados_db(oracle=oracle, produto=produto)
+                    produto_perim, produto_extrabom = ctrl_produto_mercado.busca_produtos_mercados_db(produto=produto)
 
                     # Mensagem informativa
                     print('\nProdutos disponíveis: ')
@@ -230,13 +289,24 @@ class ControllerProdutoCarrinho:
                         # Usuário escolhe a opção desejada
                         opcao = input('Digite o código do produto que deseja: ')
                         
-                        if opcao == '1':  # Produto Perim
-
-                            oracle.write(f"UPDATE produtos_carrinho SET codigo_produto_mercado = '{produto_perim.codigo}' WHERE codigo = {codigo_pruto_escolhido}")
+                        # Produto Perim
+                        if opcao == '1':  
+                            
+                            self.mongo.db['produtos_carrinho'].update_one(
+                                {"codigo": codigo_pruto_escolhido},
+                                {"$set": {"codigo_produto_mercado": produto_perim.codigo}}
+                            )
+                            
                             print(f"\nCarrinho alterado.")
                         
-                        elif opcao == '2':  # Produto ExtraBom
-                            oracle.write(f"UPDATE produtos_carrinho SET codigo_produto_mercado = '{produto_extrabom.codigo}' WHERE codigo = {codigo_pruto_escolhido}")
+                        # Produto ExtraBom
+                        elif opcao == '2':
+
+                            self.mongo.db['produtos_carrinho'].update_one(
+                                {"codigo": codigo_pruto_escolhido},
+                                {"$set": {"codigo_produto_mercado": produto_extrabom.codigo}}
+                            )
+                            
                             print(f"\nCarrinho alterado.")
                         
                         elif opcao == '3':  # Cancela alteração
@@ -256,8 +326,12 @@ class ControllerProdutoCarrinho:
                         opcao = input('Digite o código do produto que deseja: ')
 
                         if opcao == '1':  # Produto Perim
-                        
-                            oracle.write(f"UPDATE produtos_carrinho SET codigo_produto_mercado = '{produto_perim.codigo}' WHERE codigo = {codigo_pruto_escolhido}")
+                            
+                            self.mongo.db['produtos_carrinho'].update_one(
+                                {"codigo": codigo_pruto_escolhido},
+                                {"$set": {"codigo_produto_mercado": produto_perim.codigo}}
+                            )
+                            
                             print(f"\nCarrinho alterado.")
                         
                         elif opcao == '2':  # Cancela alteração
@@ -272,22 +346,29 @@ class ControllerProdutoCarrinho:
                     elif produto_extrabom:
 
                         # Menu de opções
-                        print(f'[1] - {str(produto_extrabom)}')
-                        print(f'[2] - Cancela alteração')
+                        print(f'[1] {str(produto_extrabom)}')
+                        print(f'[2] Cancela alteração')
                         
                         # Usuário escolhe a opção desejada
                         opcao = input('Digite o código do produto que deseja: ')
 
-                        if opcao == '1':  # Produto ExtraBom
+                        # Produto ExtraBom
+                        if opcao == '1':
+                            
+                            self.mongo.db['produtos_carrinho'].update_one(
+                                {"codigo": codigo_pruto_escolhido},
+                                {"$set": {"codigo_produto_mercado": produto_extrabom.codigo}}
+                            )
 
-                            oracle.write(f"UPDATE produtos_carrinho SET codigo_produto_mercado = '{produto_extrabom.codigo}' WHERE codigo = {codigo_pruto_escolhido}")
                             print(f"\nCarrinho alterado.")
-                        
-                        elif opcao == '2':  # Cancela alteração
+
+                        # Cancela alteração
+                        elif opcao == '2':
 
                             print("\nVoltando para o menu inicial...")
                         
-                        else:  # Opção inválida
+                        # Opção inválida
+                        else:
                         
                             print("\nOpção inválida, voltando para o menu inicial...")
 
@@ -304,11 +385,11 @@ class ControllerProdutoCarrinho:
 
         else:
             print('\nNão foi encontrado nenhum produto no carrinho de compras.')
+        
+        self.mongo.close()
 
-        oracle.close()
 
-    @staticmethod
-    def excluir_produto():
+    def excluir_produto(self):
         """
         Permite ao usuário excluir um produto do carrinho de compras.
 
@@ -316,37 +397,42 @@ class ControllerProdutoCarrinho:
         em seguida, confirmar a exclusão desse produto.
 
         Args:
-            Nenhum (usa uma conexão existente em OracleQueries).
+            Nenhum.
 
         Returns:
             Nenhum.
         """
-        # Inicializa a conexão com o banco de dados
-        oracle = OracleQueries(can_write=True)
-        oracle.connect()
+
+        self.mongo.connect()
+
+        ctrl_produto_carrinho = ControllerProdutoCarrinho()
+
 
         # Valida se foi encontrado algum produto no carrinho de compras
-        produtos_carrinho = ControllerProdutoCarrinho.get_produtos_carrinho(oracle=oracle)
+        produtos_carrinho = ctrl_produto_carrinho.verifica_produtos_carrinho()
 
-        if produtos_carrinho is not None:
+        if produtos_carrinho:
             # Lista todos os produtos presentes no carrinho de compras
-            ControllerProdutoCarrinho.lista_todos_produtos(oracle=oracle)
+            ctrl_produto_carrinho.lista_todos_produtos()
 
             # Usuário escolhe a opção desejada
             codigo_pruto_escolhido = int(input('\nDigite o código do produto que deseja retirar do carrinho: '))
 
             # Obtém informações sobre o produto selecionado
-            produto_escolhido = ControllerProdutoCarrinho.get_produto_por_codigo(oracle=oracle, codigo=codigo_pruto_escolhido)
+            produto_escolhido = ctrl_produto_carrinho.get_produto_por_codigo(codigo=codigo_pruto_escolhido)
 
             # Valida se foi encontrado algum produto no carrinho de compras com o código determinado
             if produto_escolhido is not None:
                 # Confirmação da exclusão
-                print(f"\nVocê realmente deseja retirar o produto {produto_escolhido.iloc[0]['descricao_produto_mercado']} do seu carrinho?")
+                print(f"\nVocê realmente deseja retirar o produto {produto_escolhido['descricao_produto_mercado']} do seu carrinho?")
                 confirma_exclusao = input(f"Digite 'sim' para confirmar: ")
 
                 if confirma_exclusao.lower().strip() == 'sim':
                     # Exclui o produto do carrinho
-                    oracle.write(f"DELETE FROM produtos_carrinho WHERE codigo = {produto_escolhido.iloc[0]['codigo']}")
+                    self.mongo.db['produtos_carrinho'].delete_one(
+                                {"codigo": produto_escolhido['codigo']},
+                            )
+                    
                     print("\nProduto retirado com sucesso!")
                 else:
                     print('\nRetirada cancelada. Voltando ao menu inicial...')
@@ -354,39 +440,92 @@ class ControllerProdutoCarrinho:
                 print('\nProduto não encontrado, voltando ao menu inicial...')
         else:
             print('\nNão há produtos no carrinho, voltando ao menu inicial...')
+        
+        self.mongo.close()
 
-        # Fecha a conexão com o banco de dados
-        oracle.close()
 
-    @staticmethod
-    def lista_todos_produtos(oracle=OracleQueries) -> bool:
+     
+    def lista_todos_produtos(self) -> bool:
         """
         Lista todos os produtos presentes no carrinho de compras.
 
         Esta função obtém os produtos no carrinho de compras, formata as informações e imprime a lista na tela.
 
         Args:
-            oracle (OracleQueries, optional): Objeto de conexão Oracle. Defaults to OracleQueries.
+            Nenhum.
 
         Returns:
             bool: True se há produtos no carrinho, False caso contrário.
         """
 
         # Busca produtos presentes no carrinho de compras
-        produtos_carrinho = ControllerProdutoCarrinho.get_produtos_carrinho(oracle=oracle)
 
-        if len(produtos_carrinho) > 0:
+        ctrl_produto_carrinho = ControllerProdutoCarrinho()
+
+        produtos_carrinho = ctrl_produto_carrinho.verifica_produtos_carrinho()
+
+        if produtos_carrinho:
 
             # Mensagem informativa
             print("Produtos presentes no carrinho de compras:\n")
 
+            self.mongo.connect()
+
+            collection = self.mongo.db['produtos_carrinho']
+            
+            resultado_consulta = collection.aggregate([
+                {
+                    "$lookup": {
+                        "from": "produtos_mercados",
+                        "localField": "codigo_produto_mercado",
+                        "foreignField": "codigo",
+                        "as": "produto_mercado"
+                    }
+                },
+                {
+                    "$unwind": "$produto_mercado"
+                },
+                {
+                    "$lookup": {
+                        "from": "produtos",
+                        "localField": "produto_mercado.codigo_produto",
+                        "foreignField": "codigo",
+                        "as": "produto"
+                    }
+                },
+                {
+                    "$unwind": "$produto"
+                },
+                {
+                    "$addFields": {
+                        "total": {
+                            "$multiply": ["$produto_mercado.valor_unitario", "$quantidade"]
+                        }
+                    }
+                },
+                {
+                    "$project": {
+                        "codigo": 1,
+                        "quantidade": 1,
+                        "codigo_produto": "$produto.codigo",
+                        "descricao_produto": "$produto.descricao",
+                        "codigo_produto_mercado": "$produto_mercado.codigo",
+                        "descricao_produto_mercado": "$produto_mercado.descricao",
+                        "valor_unitario": "$produto_mercado.valor_unitario",
+                        "total": 1
+                    }
+                }
+            ])
+
+
+
             # Itera os produtos presentes no carrinho de compras
-            for index, row in produtos_carrinho.iterrows():
-                codigo = row['codigo']
-                descricao_produto_mercado = row['descricao_produto_mercado']
-                valor_unitario = row['valor_unitario']
-                quantidade = row['quantidade']
-                total = valor_unitario * quantidade
+            for resultado in resultado_consulta:
+                codigo = resultado['codigo']
+                descricao_produto_mercado = resultado['descricao_produto_mercado']
+                valor_unitario = resultado['valor_unitario']
+                quantidade = resultado['quantidade']
+                total = resultado['total']
 
                 # Imprimindo os valores formatados
                 print(f"Código: {codigo:<5} | Produto: {descricao_produto_mercado:<30} | Valor unitário: {valor_unitario:<8.2f} | Quantidade: {quantidade:<5} | Total:{total:<10.2f}")
@@ -399,13 +538,13 @@ class ControllerProdutoCarrinho:
 
             return False
 
-    @staticmethod
-    def get_produtos_carrinho(oracle: OracleQueries) -> DataFrame:
+     
+    def verifica_produtos_carrinho(self) -> bool:
         """
         Obtém os produtos presentes no carrinho de compras.
 
         Args:
-            oracle (OracleQueries): Objeto de conexão Oracle.
+            Nenhum.
 
         Returns:
             DataFrame: DataFrame contendo informações sobre os produtos no carrinho.
@@ -421,21 +560,28 @@ class ControllerProdutoCarrinho:
 
         Retorna None se não houver nenhum produto no carrinho.
         """
-        produtos_carrinho = oracle.sqlToDataFrame(query='SELECT pc.codigo as codigo, pc.quantidade, p.codigo as codigo_produto, p.descricao as descricao_produto, pm.codigo as codigo_produto_mercado, pm.descricao as descricao_produto_mercado, pm.valor_unitario FROM produtos_carrinho pc INNER JOIN produtos_mercados pm ON pc.codigo_produto_mercado = pm.codigo INNER JOIN produtos p ON pm.codigo_produto = p.codigo')
-
-        if len(produtos_carrinho) > 0:
-            return produtos_carrinho
-        else:
-            return None
 
 
-    @staticmethod
-    def get_produto_por_codigo(oracle: OracleQueries, codigo: int) -> DataFrame:
+        # produtos_carrinho = oracle.sqlToDataFrame(query='SELECT pc.codigo as codigo, pc.quantidade, p.codigo as codigo_produto, p.descricao as descricao_produto, pm.codigo as codigo_produto_mercado, pm.descricao as descricao_produto_mercado, pm.valor_unitario FROM produtos_carrinho pc INNER JOIN produtos_mercados pm ON pc.codigo_produto_mercado = pm.codigo INNER JOIN produtos p ON pm.codigo_produto = p.codigo')
+
+        self.mongo.connect()
+        collection = self.mongo.db['produtos_carrinho']
+        total_documentos = collection.count_documents({})
+
+        if total_documentos > 0:
+            self.mongo.close()
+            return True
+        
+        self.mongo.close()
+        return False
+
+
+     
+    def get_produto_por_codigo(self, codigo: int) -> DataFrame:
         """
         Obtém um produto específico do carrinho de acordo com o código.
 
         Args:
-            oracle (OracleQueries): Objeto de conexão Oracle.
             codigo (int): O código do produto a ser recuperado.
 
         Returns:
@@ -453,16 +599,84 @@ class ControllerProdutoCarrinho:
         Retorna None se o produto não for encontrado no carrinho.
         """
         
-        produtos_carrinho = oracle.sqlToDataFrame(f'SELECT pc.codigo as codigo, pc.quantidade, p.codigo as codigo_produto, p.descricao as descricao_produto, pm.codigo as codigo_produto_mercado, pm.descricao as descricao_produto_mercado, pm.valor_unitario FROM produtos_carrinho pc INNER JOIN produtos_mercados pm ON pc.codigo_produto_mercado = pm.codigo INNER JOIN produtos p ON pm.codigo_produto = p.codigo WHERE pc.codigo = {codigo}')
+        self.mongo.connect()
+        
+        collection = self.mongo.db["produtos_carrinho"]
 
-        if len(produtos_carrinho) > 0:
-            return produtos_carrinho
-        else: 
-            return None
+        total_documentos = collection.count_documents({"codigo": codigo})
 
+        if total_documentos > 0:
+            resultado_consulta = collection.aggregate([
+                {
+                    "$match": {
+                        "codigo": codigo
+                    }
+                },
+                {
+                    "$lookup": {
+                        "from": "produtos_mercados",
+                        "localField": "codigo_produto_mercado",
+                        "foreignField": "codigo",
+                        "as": "produto_mercado"
+                    }
+                },
+                {
+                    "$unwind": "$produto_mercado"
+                },
+                {
+                    "$lookup": {
+                        "from": "produtos",
+                        "localField": "produto_mercado.codigo_produto",
+                        "foreignField": "codigo",
+                        "as": "produto"
+                    }
+                },
+                {
+                    "$unwind": "$produto"
+                },
+                {
+                    "$project": {
+                        "codigo": "$codigo",
+                        "quantidade": "$quantidade",
+                        "codigo_produto": "$produto.codigo",
+                        "descricao_produto": "$produto.descricao",
+                        "codigo_produto_mercado": "$produto_mercado.codigo",
+                        "descricao_produto_mercado": "$produto_mercado.descricao",
+                        "valor_unitario": "$produto_mercado.valor_unitario"
+                    }
+                }
+            ])
+
+            for documento in resultado_consulta:
+                dados_produto_carrinho = {
+                    'codigo': documento['codigo'],
+                    'codigo_produto': documento['codigo_produto'],
+                    'codigo_produto_mercado': documento['codigo_produto_mercado'],
+                    'quantidade': documento['quantidade'],
+                    'descricao_produto_mercado': documento['descricao_produto_mercado']
+                }
+            
+            self.mongo.close()
+
+            return dados_produto_carrinho
+        
+        self.mongo.close()
+        return None
+
+    def exibe_produto_atualizado(self, codigo_produto):
+        
+        ctrl_produto_carrinho = ControllerProdutoCarrinho()
+        produto_atualizado = ctrl_produto_carrinho.get_produto_por_codigo(codigo=codigo_produto)
+                        
+        print('\nProduto atualizado!')
+        print(f"Código: {produto_atualizado['codigo']}, "
+                f"Quantidade: {produto_atualizado['quantidade']}, "
+                f"Código Produto: {produto_atualizado['codigo_produto']}, "
+                f"Código Produto Mercado: {produto_atualizado['codigo_produto_mercado']}, "
+                f"Descrição Produto Mercado: {produto_atualizado['descricao_produto_mercado']}, ")
 
 if __name__ == "__main__":
-    ControllerProdutoCarrinho.adicionar_produto()
+    # ControllerProdutoCarrinho.adicionar_produto()
     # ControllerProdutoCarrinho.alterar_carrinho()
     # ControllerProdutoCarrinho.excluir_produto()
     ...

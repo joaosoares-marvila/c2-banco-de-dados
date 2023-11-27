@@ -6,7 +6,6 @@ from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webelement import WebElement
 import os
-import yaml
 
 TEMPO_ESPERA = 20
 
